@@ -1,27 +1,29 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div class="flex items-center gap-4">
-                <a href="{{ route('admin.membership-fees.index') }}" class="text-gray-500 hover:text-gray-700">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                    </svg>
-                </a>
-                <h2 class="text-xl font-semibold text-gray-800">
-                    {{ __('messages.membership_fee_configuration') }}
-                </h2>
-            </div>
-            <a href="{{ route('admin.membership-fees.config.create') }}"
-                class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                {{ __('messages.add_configuration') }}
-            </a>
-        </div>
-    </x-slot>
+    <x-slot name="title">{{ __('messages.membership_fee_configuration') }}</x-slot>
 
-    <div class="py-6">
+    <div class="py-2 lg:py-6">
+        {{-- Page Header --}}
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <a href="{{ route('admin.membership-fees.index') }}" class="text-gray-500 hover:text-gray-700">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </a>
+                    <h2 class="text-2xl font-bold text-gray-800">
+                        {{ __('messages.membership_fee_configuration') }}
+                    </h2>
+                </div>
+                <a href="{{ route('admin.membership-fees.config.create') }}"
+                    class="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    {{ __('messages.add_configuration') }}
+                </a>
+            </div>
+        </div>
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             {{-- Success Message --}}
             @if (session('success'))

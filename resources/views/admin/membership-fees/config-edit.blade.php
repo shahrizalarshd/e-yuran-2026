@@ -1,18 +1,20 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center gap-4">
-            <a href="{{ route('admin.membership-fees.config.index') }}" class="text-gray-500 hover:text-gray-700">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                </svg>
-            </a>
-            <h2 class="text-xl font-semibold text-gray-800">
-                {{ __('messages.edit_membership_fee_config') }}
-            </h2>
-        </div>
-    </x-slot>
+    <x-slot name="title">{{ __('messages.edit_membership_fee_config') }}</x-slot>
 
-    <div class="py-6">
+    <div class="py-2 lg:py-6">
+        {{-- Page Header --}}
+        <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+            <div class="flex items-center gap-4">
+                <a href="{{ route('admin.membership-fees.config.index') }}" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </a>
+                <h2 class="text-2xl font-bold text-gray-800">
+                    {{ __('messages.edit_membership_fee_config') }}
+                </h2>
+            </div>
+        </div>
         <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <form action="{{ route('admin.membership-fees.config.update', $configuration) }}" method="POST" class="p-6 space-y-6">
