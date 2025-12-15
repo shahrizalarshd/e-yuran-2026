@@ -1,0 +1,92 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class MembershipFee extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'house_id',
+        'resident_id',
+        'amount',
+        'status',
+        'paid_at',
+        'is_legacy',
+        'legacy_owner_name',
+        'fee_year',
+        'payment_reference',
+    ];
+
+    protected $casts = [
+        'amount' => 'decimal:2',
+        'paid_at' => 'date',
+        'is_legacy' => 'boolean',
+        'fee_year' => 'integer',
+    ];
+
+    // Relationships
+    public function house(): BelongsTo
+    {
+        return $this->belongsTo(House::class);
+    }
+
+    public function resident(): BelongsTo
+    {
+        return $this->belongsTo(Resident::class);
+    }
+
+    // Scopes
+    public function scopePaid($query)
+    {
+        return $query->where('status', 'paid');
+    }
+
+    public function scopeUnpaid($query)
+    {
+        return $query->where('status', 'unpaid');
+    }
+
+    public function scopeLegacy($query)
+    {
+        return $query->where('is_legacy', true);
+    }
+
+    public function scopeForYear($query, $year)
+    {
+        return $query->where('fee_year', $year);
+    }
+
+    // Accessors
+    public function getStatusBadgeClassAttribute(): string
+    {
+        return match ($this->status) {
+            'paid' => 'bg-green-100 text-green-800',
+            'unpaid' => 'bg-red-100 text-red-800',
+            default => 'bg-gray-100 text-gray-800',
+        };
+    }
+
+    public function getOwnerNameAttribute(): string
+    {
+        if ($this->resident) {
+            return $this->resident->name;
+        }
+        return $this->legacy_owner_name ?? 'Unknown';
+    }
+
+    // Helper methods
+    public function markAsPaid(?string $reference = null): void
+    {
+        $this->update([
+            'status' => 'paid',
+            'paid_at' => now(),
+            'payment_reference' => $reference,
+        ]);
+    }
+}
+

@@ -23,11 +23,15 @@ class Payment extends Model
         'toyyibpay_transaction_id',
         'toyyibpay_response',
         'paid_at',
+        'is_legacy',
+        'payment_method',
+        'legacy_reference',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'paid_at' => 'datetime',
+        'is_legacy' => 'boolean',
     ];
 
     // Relationships
@@ -67,6 +71,16 @@ class Payment extends Model
     public function scopeForHouse($query, $houseId)
     {
         return $query->where('house_id', $houseId);
+    }
+
+    public function scopeLegacy($query)
+    {
+        return $query->where('is_legacy', true);
+    }
+
+    public function scopeNotLegacy($query)
+    {
+        return $query->where('is_legacy', false);
     }
 
     // Accessors

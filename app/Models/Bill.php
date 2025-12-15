@@ -22,6 +22,7 @@ class Bill extends Model
         'paid_amount',
         'due_date',
         'paid_at',
+        'is_legacy',
     ];
 
     protected $casts = [
@@ -29,6 +30,7 @@ class Bill extends Model
         'paid_amount' => 'decimal:2',
         'due_date' => 'date',
         'paid_at' => 'date',
+        'is_legacy' => 'boolean',
     ];
 
     // Relationships
@@ -79,6 +81,16 @@ class Bill extends Model
     {
         return $query->where('status', 'unpaid')
             ->where('due_date', '<', now());
+    }
+
+    public function scopeLegacy($query)
+    {
+        return $query->where('is_legacy', true);
+    }
+
+    public function scopeNotLegacy($query)
+    {
+        return $query->where('is_legacy', false);
     }
 
     // Accessors

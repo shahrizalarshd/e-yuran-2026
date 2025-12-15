@@ -44,6 +44,11 @@ class House extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function membershipFees(): HasMany
+    {
+        return $this->hasMany(MembershipFee::class);
+    }
+
     // Scopes
     public function scopeRegistered($query)
     {

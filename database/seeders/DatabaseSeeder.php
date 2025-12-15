@@ -48,10 +48,12 @@ class DatabaseSeeder extends Seeder
 
     private function createFeeConfiguration(): void
     {
+        // Fee configuration akan dibuat oleh import:legacy-data command
+        // Ini hanya untuk development/testing tanpa import
         FeeConfiguration::create([
-            'name' => 'Yuran Bulanan 2025',
-            'amount' => 50.00,
-            'effective_from' => '2025-01-01',
+            'name' => 'Yuran Bulanan 2026',
+            'amount' => 10.00,
+            'effective_from' => '2026-01-01',
             'effective_until' => null,
             'description' => 'Yuran bulanan perumahan Taman Tropika Kajang',
             'is_active' => true,
