@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Resident;
 use App\Models\HouseMember;
+use App\Models\MembershipFee;
+use App\Models\MembershipFeeConfiguration;
 use App\Models\AuditLog;
 use App\Models\SystemNotification;
 use App\Mail\UserVerificationApproved;
@@ -64,6 +66,11 @@ class ResidentController extends Controller
         $houseMember->approve(auth()->user());
 
         AuditLog::logUpdate($houseMember, $oldValues, "Member approved for house {$houseMember->house->house_no}");
+
+        // Create membership fee for owner or tenant
+        if (in_array($houseMember->relationship, ['owner', 'tenant'])) {
+            $this->createMembershipFee($houseMember);
+        }
 
         // Notify the resident
         if ($houseMember->resident->user) {
@@ -144,6 +151,41 @@ class ResidentController extends Controller
         AuditLog::logUpdate($houseMember, $oldValues, "Member permissions updated");
 
         return back()->with('success', __('messages.updated_successfully'));
+    }
+
+    /**
+     * Create membership fee for owner or tenant
+     */
+    private function createMembershipFee(HouseMember $houseMember): void
+    {
+        // Check if resident already has a membership fee for this house
+        $existingFee = MembershipFee::where('house_id', $houseMember->house_id)
+            ->where('resident_id', $houseMember->resident_id)
+            ->exists();
+
+        if ($existingFee) {
+            return; // Already has a membership fee
+        }
+
+        // Get current membership fee amount from configuration
+        $amount = MembershipFeeConfiguration::getCurrentAmount();
+
+        MembershipFee::create([
+            'house_id' => $houseMember->house_id,
+            'resident_id' => $houseMember->resident_id,
+            'amount' => $amount,
+            'status' => 'unpaid',
+            'fee_year' => now()->year,
+            'is_legacy' => false,
+        ]);
+
+        AuditLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'create_membership_fee',
+            'model_type' => MembershipFee::class,
+            'model_id' => null,
+            'description' => "Membership fee created for {$houseMember->resident->name} at {$houseMember->house->full_address}",
+        ]);
     }
 }
 

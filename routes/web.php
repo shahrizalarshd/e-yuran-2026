@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\ResidentController;
 use App\Http\Controllers\Admin\BillController as AdminBillController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\FeeConfigurationController;
+use App\Http\Controllers\Admin\MembershipFeeController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Resident\DashboardController as ResidentDashboardController;
@@ -120,6 +121,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Fee Configuration (Super Admin & Treasurer)
         Route::resource('fees', FeeConfigurationController::class)
             ->middleware('role:super_admin,treasurer');
+
+        // Membership Fees (Super Admin & Treasurer)
+        Route::middleware('role:super_admin,treasurer')->group(function () {
+            Route::get('/membership-fees', [MembershipFeeController::class, 'index'])->name('membership-fees.index');
+            Route::get('/membership-fees/{membershipFee}/edit', [MembershipFeeController::class, 'edit'])->name('membership-fees.edit');
+            Route::put('/membership-fees/{membershipFee}', [MembershipFeeController::class, 'update'])->name('membership-fees.update');
+            Route::patch('/membership-fees/{membershipFee}/mark-paid', [MembershipFeeController::class, 'markAsPaid'])->name('membership-fees.mark-paid');
+            
+            // Membership Fee Configuration
+            Route::get('/membership-fees/config', [MembershipFeeController::class, 'configIndex'])->name('membership-fees.config.index');
+            Route::get('/membership-fees/config/create', [MembershipFeeController::class, 'configCreate'])->name('membership-fees.config.create');
+            Route::post('/membership-fees/config', [MembershipFeeController::class, 'configStore'])->name('membership-fees.config.store');
+            Route::get('/membership-fees/config/{configuration}/edit', [MembershipFeeController::class, 'configEdit'])->name('membership-fees.config.edit');
+            Route::put('/membership-fees/config/{configuration}', [MembershipFeeController::class, 'configUpdate'])->name('membership-fees.config.update');
+            Route::delete('/membership-fees/config/{configuration}', [MembershipFeeController::class, 'configDestroy'])->name('membership-fees.config.destroy');
+        });
 
         // Settings (Super Admin only)
         Route::middleware('role:super_admin')->group(function () {

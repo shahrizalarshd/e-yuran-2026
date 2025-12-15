@@ -61,6 +61,15 @@
             </a>
 
             @if(auth()->user()->isSuperAdmin() || auth()->user()->isTreasurer())
+            <a href="{{ route('admin.membership-fees.index') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg {{ request()->routeIs('admin.membership-fees.*') ? 'bg-primary-800 text-white' : 'text-primary-100 hover:bg-primary-600' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 9a2 2 0 10-4 0v5a2 2 0 01-2 2h6m-6-4h4m8 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>{{ __('messages.membership_fees') }}</span>
+            </a>
+            @endif
+
+            @if(auth()->user()->isSuperAdmin() || auth()->user()->isTreasurer())
             <div class="pt-4 mt-4 border-t border-primary-600">
                 <p class="px-3 text-xs font-semibold text-primary-300 uppercase tracking-wider mb-2">{{ __('messages.settings') }}</p>
                 

@@ -7,6 +7,7 @@ use App\Models\Resident;
 use App\Models\House;
 use App\Models\Bill;
 use App\Models\Payment;
+use App\Models\MembershipFee;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -71,6 +72,17 @@ class DashboardController extends Controller
         // Chart Data: Payment History (last 12 months)
         $paymentHistoryData = $this->getPaymentHistoryData($house);
 
+        // Get membership fees for this resident at this house
+        $membershipFees = MembershipFee::where('house_id', $house->id)
+            ->where(function ($q) use ($resident) {
+                $q->where('resident_id', $resident->id)
+                    ->orWhereNull('resident_id'); // Include legacy fees
+            })
+            ->orderBy('fee_year', 'desc')
+            ->get();
+
+        $unpaidMembershipFee = $membershipFees->where('status', 'unpaid')->first();
+
         return view('resident.dashboard', compact(
             'resident',
             'house',
@@ -82,7 +94,9 @@ class DashboardController extends Controller
             'primaryMembership',
             'billStatusData',
             'paymentHistoryData',
-            'currentYear'
+            'currentYear',
+            'membershipFees',
+            'unpaidMembershipFee'
         ));
     }
 
