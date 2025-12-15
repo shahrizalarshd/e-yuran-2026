@@ -124,18 +124,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Membership Fees (Super Admin & Treasurer)
         Route::middleware('role:super_admin,treasurer')->group(function () {
-            Route::get('/membership-fees', [MembershipFeeController::class, 'index'])->name('membership-fees.index');
-            Route::get('/membership-fees/{membershipFee}/edit', [MembershipFeeController::class, 'edit'])->name('membership-fees.edit');
-            Route::put('/membership-fees/{membershipFee}', [MembershipFeeController::class, 'update'])->name('membership-fees.update');
-            Route::patch('/membership-fees/{membershipFee}/mark-paid', [MembershipFeeController::class, 'markAsPaid'])->name('membership-fees.mark-paid');
-            
-            // Membership Fee Configuration
+            // Membership Fee Configuration (must be before {membershipFee} routes)
             Route::get('/membership-fees/config', [MembershipFeeController::class, 'configIndex'])->name('membership-fees.config.index');
             Route::get('/membership-fees/config/create', [MembershipFeeController::class, 'configCreate'])->name('membership-fees.config.create');
             Route::post('/membership-fees/config', [MembershipFeeController::class, 'configStore'])->name('membership-fees.config.store');
             Route::get('/membership-fees/config/{configuration}/edit', [MembershipFeeController::class, 'configEdit'])->name('membership-fees.config.edit');
             Route::put('/membership-fees/config/{configuration}', [MembershipFeeController::class, 'configUpdate'])->name('membership-fees.config.update');
             Route::delete('/membership-fees/config/{configuration}', [MembershipFeeController::class, 'configDestroy'])->name('membership-fees.config.destroy');
+            
+            // Membership Fee CRUD
+            Route::get('/membership-fees', [MembershipFeeController::class, 'index'])->name('membership-fees.index');
+            Route::get('/membership-fees/{membershipFee}/edit', [MembershipFeeController::class, 'edit'])->name('membership-fees.edit');
+            Route::put('/membership-fees/{membershipFee}', [MembershipFeeController::class, 'update'])->name('membership-fees.update');
+            Route::patch('/membership-fees/{membershipFee}/mark-paid', [MembershipFeeController::class, 'markAsPaid'])->name('membership-fees.mark-paid');
         });
 
         // Settings (Super Admin only)
