@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
 
-            $table->index(['is_active', 'effective_from', 'effective_until']);
+            $table->index(['is_active', 'effective_from', 'effective_until'], 'membership_fee_active_dates_idx');
         });
     }
 
