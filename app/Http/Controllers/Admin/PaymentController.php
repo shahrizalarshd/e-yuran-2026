@@ -103,7 +103,7 @@ class PaymentController extends Controller
         }
         
         $monthlyData = $monthlyQuery
-            ->selectRaw("CAST(strftime('%m', paid_at) AS INTEGER) as month, SUM(amount) as total, COUNT(*) as count")
+            ->selectRaw("MONTH(paid_at) as month, SUM(amount) as total, COUNT(*) as count")
             ->groupBy('month')
             ->orderBy('month')
             ->get()
@@ -113,7 +113,7 @@ class PaymentController extends Controller
             ->orderBy('paid_at', 'desc')
             ->paginate(50);
 
-        $years = Payment::selectRaw("DISTINCT CAST(strftime('%Y', paid_at) AS INTEGER) as year")
+        $years = Payment::selectRaw("DISTINCT YEAR(paid_at) as year")
             ->whereNotNull('paid_at')
             ->orderBy('year', 'desc')
             ->pluck('year');

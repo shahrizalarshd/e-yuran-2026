@@ -51,7 +51,7 @@ class DashboardController extends Controller
             ->distinct()
             ->pluck('bill_year');
         
-        $paymentYears = Payment::selectRaw("DISTINCT CAST(strftime('%Y', paid_at) AS INTEGER) as year")
+        $paymentYears = Payment::selectRaw("DISTINCT YEAR(paid_at) as year")
             ->whereNotNull('paid_at')
             ->where('paid_at', '>=', now()->subYears(10)->startOfYear())
             ->pluck('year');
@@ -85,7 +85,7 @@ class DashboardController extends Controller
         // Chart Data: Monthly Collection for Selected Year
         $monthlyCollection = Payment::where('status', 'success')
             ->whereYear('paid_at', $currentYear)
-            ->selectRaw("CAST(strftime('%m', paid_at) AS INTEGER) as month, SUM(amount) as total")
+            ->selectRaw("MONTH(paid_at) as month, SUM(amount) as total")
             ->groupBy('month')
             ->orderBy('month')
             ->pluck('total', 'month')
@@ -101,7 +101,7 @@ class DashboardController extends Controller
         $lastYear = $compareYear;
         $lastYearCollection = Payment::where('status', 'success')
             ->whereYear('paid_at', $compareYear)
-            ->selectRaw("CAST(strftime('%m', paid_at) AS INTEGER) as month, SUM(amount) as total")
+            ->selectRaw("MONTH(paid_at) as month, SUM(amount) as total")
             ->groupBy('month')
             ->orderBy('month')
             ->pluck('total', 'month')
