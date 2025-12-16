@@ -64,9 +64,9 @@ class DatabaseSeeder extends Seeder
     {
         // Super Admin
         User::create([
-            'name' => 'Super Admin',
-            'email' => 'admin@tamantropika.my',
-            'password' => Hash::make('password123'),
+            'name' => 'Admin',
+            'email' => 'admin@tropika.my',
+            'password' => Hash::make('password'),
             'role' => 'super_admin',
             'language_preference' => 'bm',
             'is_active' => true,
@@ -76,8 +76,8 @@ class DatabaseSeeder extends Seeder
         // Treasurer
         User::create([
             'name' => 'Bendahari',
-            'email' => 'bendahari@tamantropika.my',
-            'password' => Hash::make('password123'),
+            'email' => 'bendahari@tropika.my',
+            'password' => Hash::make('password'),
             'role' => 'treasurer',
             'language_preference' => 'bm',
             'is_active' => true,
@@ -87,8 +87,8 @@ class DatabaseSeeder extends Seeder
         // Auditor
         User::create([
             'name' => 'Pemeriksa',
-            'email' => 'auditor@tamantropika.my',
-            'password' => Hash::make('password123'),
+            'email' => 'auditor@tropika.my',
+            'password' => Hash::make('password'),
             'role' => 'auditor',
             'language_preference' => 'bm',
             'is_active' => true,
@@ -99,9 +99,10 @@ class DatabaseSeeder extends Seeder
     private function createHouses(): void
     {
         $streets = [
-            'Jalan Tropika 1',
             'Jalan Tropika 2',
             'Jalan Tropika 3',
+            'Jalan Tropika 4',
+            'Jalan Tropika 5',
         ];
 
         foreach ($streets as $street) {
@@ -121,9 +122,9 @@ class DatabaseSeeder extends Seeder
     {
         // Create a sample resident user
         $user = User::create([
-            'name' => 'Ahmad Penduduk',
-            'email' => 'ahmad@example.com',
-            'password' => Hash::make('password123'),
+            'name' => 'Penduduk',
+            'email' => 'ahmad1@gmail.com',
+            'password' => Hash::make('password'),
             'role' => 'resident',
             'language_preference' => 'bm',
             'is_active' => true,
@@ -134,7 +135,7 @@ class DatabaseSeeder extends Seeder
         $resident = Resident::create([
             'user_id' => $user->id,
             'name' => 'Ahmad bin Abdullah',
-            'email' => 'ahmad@example.com',
+            'email' => 'ahmad1@gmail.com',
             'phone' => '0123456789',
             'ic_number' => '800101-01-1234',
             'language_preference' => 'bm',

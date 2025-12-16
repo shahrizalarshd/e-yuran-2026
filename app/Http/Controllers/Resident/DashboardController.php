@@ -168,6 +168,10 @@ class DashboardController extends Controller
     {
         $resident = auth()->user()->resident;
 
+        if (!$resident) {
+            abort(403, __('Sila lengkapkan profil penduduk anda terlebih dahulu.'));
+        }
+
         // Verify membership
         $membership = $resident->houseMemberships()
             ->where('house_id', $house->id)

@@ -78,6 +78,7 @@ return [
     'house_details' => 'Maklumat Rumah',
     'total_houses' => 'Jumlah Rumah',
     'registered_houses' => 'Rumah Berdaftar',
+    'member_houses' => 'Rumah Ahli Aktif',
     'active_houses' => 'Rumah Aktif',
     
     // Resident / Member

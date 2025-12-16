@@ -6,12 +6,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * MembershipFee Model - Yuran Keahlian
+ * MODEL HIBRID: Bil attach ke OCCUPANCY (house_occupancy_id)
+ * 
+ * Bila owner tukar, keahlian RESET - owner baru perlu daftar semula
+ */
 class MembershipFee extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'house_id',
+        'house_id',              // Legacy field, akan deprecated
+        'house_occupancy_id',    // MODEL HIBRID: Link ke occupancy
         'resident_id',
         'amount',
         'status',
@@ -30,9 +37,22 @@ class MembershipFee extends Model
     ];
 
     // Relationships
+
+    /**
+     * @deprecated Use houseOccupancy() instead
+     */
     public function house(): BelongsTo
     {
         return $this->belongsTo(House::class);
+    }
+
+    /**
+     * Occupancy yang bayar yuran keahlian ini
+     * MODEL HIBRID: Yuran keahlian per occupancy
+     */
+    public function houseOccupancy(): BelongsTo
+    {
+        return $this->belongsTo(HouseOccupancy::class);
     }
 
     public function resident(): BelongsTo
@@ -61,6 +81,14 @@ class MembershipFee extends Model
         return $query->where('fee_year', $year);
     }
 
+    /**
+     * Filter by occupancy
+     */
+    public function scopeForOccupancy($query, $occupancyId)
+    {
+        return $query->where('house_occupancy_id', $occupancyId);
+    }
+
     // Accessors
     public function getStatusBadgeClassAttribute(): string
     {
@@ -73,10 +101,24 @@ class MembershipFee extends Model
 
     public function getOwnerNameAttribute(): string
     {
+        // First try to get from occupancy's resident
+        if ($this->houseOccupancy && $this->houseOccupancy->resident) {
+            return $this->houseOccupancy->resident->name;
+        }
+        // Then try resident directly
         if ($this->resident) {
             return $this->resident->name;
         }
+        // Finally use legacy owner name
         return $this->legacy_owner_name ?? 'Unknown';
+    }
+
+    /**
+     * Get the house through occupancy
+     */
+    public function getHouseViaOccupancyAttribute(): ?House
+    {
+        return $this->houseOccupancy?->house;
     }
 
     // Helper methods
@@ -87,6 +129,31 @@ class MembershipFee extends Model
             'paid_at' => now(),
             'payment_reference' => $reference,
         ]);
+
+        // Also update the occupancy's membership status
+        if ($this->houseOccupancy) {
+            $this->houseOccupancy->update([
+                'is_member' => true,
+                'membership_fee_paid_at' => now(),
+                'membership_fee_amount' => $this->amount,
+            ]);
+        }
+    }
+
+    /**
+     * Create membership fee for an occupancy
+     * MODEL HIBRID: Yuran keahlian per occupancy
+     */
+    public static function createForOccupancy(HouseOccupancy $occupancy, float $amount): self
+    {
+        return self::create([
+            'house_id' => $occupancy->house_id,
+            'house_occupancy_id' => $occupancy->id,
+            'resident_id' => $occupancy->resident_id,
+            'amount' => $amount,
+            'status' => 'unpaid',
+            'fee_year' => now()->year,
+            'is_legacy' => false,
+        ]);
     }
 }
-

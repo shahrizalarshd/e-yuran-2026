@@ -178,10 +178,10 @@ class DemoDataSeeder extends Seeder
     private function seedHouses(): array
     {
         $streets = [
-            'Jalan Tropika 1',
             'Jalan Tropika 2',
             'Jalan Tropika 3',
-            'Jalan Tropika Utama',
+            'Jalan Tropika 4',
+            'Jalan Tropika 5',
         ];
 
         $houses = [];

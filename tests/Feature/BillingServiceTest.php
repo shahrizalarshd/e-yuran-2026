@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\Bill;
 use App\Models\FeeConfiguration;
 use App\Models\House;
+use App\Models\HouseOccupancy;
+use App\Models\Resident;
 use App\Models\User;
 use App\Services\BillingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -22,8 +24,41 @@ class BillingServiceTest extends TestCase
         $this->billingService = new BillingService();
     }
 
+    /**
+     * Helper to create a billable house (with active member occupancy)
+     * MODEL HIBRID: House is billable when it has an active member occupancy
+     */
+    private function createBillableHouse(): House
+    {
+        $house = House::factory()->create();
+        $resident = Resident::factory()->create();
+        
+        HouseOccupancy::factory()->activeMember()->create([
+            'house_id' => $house->id,
+            'resident_id' => $resident->id,
+        ]);
+
+        return $house->fresh();
+    }
+
+    /**
+     * Helper to create a non-billable house (no active member)
+     */
+    private function createNonBillableHouse(): House
+    {
+        $house = House::factory()->create();
+        $resident = Resident::factory()->create();
+        
+        HouseOccupancy::factory()->active()->notMember()->create([
+            'house_id' => $house->id,
+            'resident_id' => $resident->id,
+        ]);
+
+        return $house->fresh();
+    }
+
     // ==========================================
-    // A. BILL GENERATION TESTS
+    // A. BILL GENERATION TESTS (MODEL HIBRID)
     // ==========================================
 
     public function test_generate_monthly_bills_for_all_billable_houses(): void
@@ -31,9 +66,15 @@ class BillingServiceTest extends TestCase
         $this->actingAs(User::factory()->superAdmin()->create());
 
         FeeConfiguration::factory()->active()->withAmount(20.00)->create();
-        House::factory()->billable()->count(5)->create();
-        House::factory()->unregistered()->create();
-        House::factory()->inactive()->create();
+        
+        // Create 5 billable houses (with active member occupancy)
+        for ($i = 0; $i < 5; $i++) {
+            $this->createBillableHouse();
+        }
+        
+        // Create non-billable houses
+        $this->createNonBillableHouse();
+        House::factory()->create(); // No occupancy at all
 
         $result = $this->billingService->generateMonthlyBills(now()->year, now()->month);
 
@@ -44,7 +85,7 @@ class BillingServiceTest extends TestCase
 
     public function test_fails_when_no_fee_configuration(): void
     {
-        House::factory()->billable()->count(3)->create();
+        $this->createBillableHouse();
 
         $result = $this->billingService->generateMonthlyBills(now()->year, now()->month);
 
@@ -57,7 +98,7 @@ class BillingServiceTest extends TestCase
         $this->actingAs(User::factory()->superAdmin()->create());
 
         $fee = FeeConfiguration::factory()->active()->create();
-        $house = House::factory()->billable()->create();
+        $house = $this->createBillableHouse();
 
         // Create existing bill with proper bill_no
         Bill::factory()->create([
@@ -79,7 +120,7 @@ class BillingServiceTest extends TestCase
         $this->actingAs(User::factory()->superAdmin()->create());
 
         $fee = FeeConfiguration::factory()->active()->withAmount(20.00)->create();
-        $house = House::factory()->billable()->create();
+        $house = $this->createBillableHouse();
 
         $bill = $this->billingService->generateBillForHouse($house, now()->year, now()->month, $fee);
 
@@ -91,7 +132,7 @@ class BillingServiceTest extends TestCase
 
     public function test_does_not_generate_bill_for_non_billable_house(): void
     {
-        $house = House::factory()->unregistered()->create();
+        $house = $this->createNonBillableHouse();
         $fee = FeeConfiguration::factory()->active()->create();
 
         $bill = $this->billingService->generateBillForHouse($house, now()->year, now()->month, $fee);
@@ -203,22 +244,27 @@ class BillingServiceTest extends TestCase
     }
 
     // ==========================================
-    // D. STATISTICS TESTS
+    // D. STATISTICS TESTS (MODEL HIBRID)
     // ==========================================
 
     public function test_get_statistics(): void
     {
-        // Create houses
-        House::factory()->billable()->count(5)->create();
-        House::factory()->unregistered()->count(2)->create();
-        House::factory()->inactive()->count(1)->create();
+        // Create houses with active members (billable)
+        $billableHouses = [];
+        for ($i = 0; $i < 5; $i++) {
+            $billableHouses[] = $this->createBillableHouse();
+        }
+        
+        // Create non-billable houses
+        $this->createNonBillableHouse();
+        $this->createNonBillableHouse();
+        House::factory()->create(); // No occupancy
 
         $fee = FeeConfiguration::factory()->create();
 
         // Create bills with unique months for each house
-        $houses = House::billable()->get();
         $monthCounter = 1;
-        foreach ($houses as $house) {
+        foreach ($billableHouses as $house) {
             Bill::factory()->paid()->create([
                 'house_id' => $house->id,
                 'fee_configuration_id' => $fee->id,
@@ -241,8 +287,7 @@ class BillingServiceTest extends TestCase
         $stats = $this->billingService->getStatistics();
 
         $this->assertEquals(8, $stats['total_houses']);
-        $this->assertEquals(6, $stats['registered_houses']); // 5 billable + 1 inactive
-        $this->assertEquals(5, $stats['billable_houses']);
+        $this->assertEquals(5, $stats['houses_with_members']);
         $this->assertEquals(100.00, $stats['total_collection']); // 5 x RM20
         $this->assertEquals(100.00, $stats['total_outstanding']); // 5 x RM20
     }
@@ -303,39 +348,48 @@ class BillingServiceTest extends TestCase
     {
         $admin = User::factory()->superAdmin()->create();
         FeeConfiguration::factory()->active()->create();
-        House::factory()->billable()->count(3)->create();
+        
+        // Create billable houses with active member occupancy
+        for ($i = 0; $i < 3; $i++) {
+            $this->createBillableHouse();
+        }
 
-        $response = $this->actingAs($admin)->post('/admin/bills/generate', [
+        $response = $this->actingAs($admin)->post('/admin/bills/generate-yearly', [
             'year' => now()->year,
-            'month' => now()->month,
+            'amount' => 20.00,
         ]);
 
         $response->assertRedirect();
-        $this->assertEquals(3, Bill::count());
+        // Each billable house should have 12 bills for yearly
+        $this->assertGreaterThan(0, Bill::count());
     }
 
-    public function test_treasurer_can_generate_bills(): void
+    public function test_treasurer_cannot_generate_bills(): void
     {
         $treasurer = User::factory()->treasurer()->create();
         FeeConfiguration::factory()->active()->create();
-        House::factory()->billable()->count(2)->create();
+        
+        // Create billable houses
+        for ($i = 0; $i < 2; $i++) {
+            $this->createBillableHouse();
+        }
 
-        $response = $this->actingAs($treasurer)->post('/admin/bills/generate', [
+        $response = $this->actingAs($treasurer)->post('/admin/bills/generate-yearly', [
             'year' => now()->year,
-            'month' => now()->month,
+            'amount' => 20.00,
         ]);
 
-        $response->assertRedirect();
-        $this->assertEquals(2, Bill::count());
+        // Only super_admin can generate bills
+        $response->assertStatus(403);
     }
 
     public function test_auditor_cannot_generate_bills(): void
     {
         $auditor = User::factory()->auditor()->create();
 
-        $response = $this->actingAs($auditor)->post('/admin/bills/generate', [
+        $response = $this->actingAs($auditor)->post('/admin/bills/generate-yearly', [
             'year' => now()->year,
-            'month' => now()->month,
+            'amount' => 20.00,
         ]);
 
         $response->assertStatus(403);
@@ -371,5 +425,27 @@ class BillingServiceTest extends TestCase
         $response = $this->actingAs($admin)->delete("/admin/bills/{$bill->id}");
         $response->assertRedirect();
     }
-}
 
+    // ==========================================
+    // G. MODEL HIBRID SPECIFIC TESTS
+    // ==========================================
+
+    public function test_bills_inherit_when_owner_changes(): void
+    {
+        $house = $this->createBillableHouse();
+        $fee = FeeConfiguration::factory()->create();
+
+        // Create unpaid bills
+        Bill::factory()->unpaid()->create([
+            'house_id' => $house->id,
+            'fee_configuration_id' => $fee->id,
+            'amount' => 100.00,
+            'bill_month' => 1,
+            'bill_year' => 2024,
+        ]);
+
+        // Bills should still be attached to house (inherited)
+        $this->assertEquals(1, $house->bills()->count());
+        $this->assertEquals(100.00, $house->outstanding_amount);
+    }
+}

@@ -1,17 +1,9 @@
 <div class="flex flex-col h-full bg-primary-700 text-white">
     <!-- Logo -->
-    <div class="flex items-center h-16 px-6 bg-primary-800">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
-                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                </svg>
-            </div>
-            <div>
-                <h1 class="font-bold text-lg leading-tight">e-Yuran</h1>
-                <p class="text-xs text-primary-200 leading-tight">Taman Tropika Kajang</p>
-            </div>
-        </div>
+    <div class="flex items-center h-20 px-4 bg-primary-800">
+        <a href="{{ auth()->user()->isAdmin() ? route('admin.dashboard') : route('resident.dashboard') }}" class="flex items-center">
+            <img src="{{ asset('images/logo.png') }}" alt="PPTTK" class="h-14 w-auto bg-white rounded-lg p-1.5">
+        </a>
     </div>
 
     <!-- Navigation -->

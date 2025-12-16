@@ -22,3 +22,19 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Legacy Data Files (Excel) - DO NOT COMMIT to Git
+*.xlsx
+*.xls
+Fail Yuran*.xlsx
+Rekod Bayaran*.xlsx
+Penyata Yuran*.xlsx
+
+# Backup files
+*.sql
+*.sql.gz
+*.tar.gz
+backups/
+
+# Deployment script (make executable locally)
+# deploy.sh

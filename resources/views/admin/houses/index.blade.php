@@ -7,7 +7,7 @@
             <div>
                 <p class="text-gray-500">{{ __('Jumlah') }}: {{ $houses->total() }} {{ __('rumah') }}</p>
             </div>
-            @if(auth()->user()->isSuperAdmin())
+            @if(auth()->user()->isSuperAdmin() || auth()->user()->isTreasurer())
             <a href="{{ route('admin.houses.create') }}" class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition min-h-touch">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>

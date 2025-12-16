@@ -12,6 +12,12 @@ class BillController extends Controller
     public function index(Request $request)
     {
         $resident = auth()->user()->resident;
+
+        if (!$resident) {
+            return redirect()->route('resident.dashboard')
+                ->with('error', __('Sila lengkapkan profil penduduk anda terlebih dahulu.'));
+        }
+
         $house = $this->getSelectedHouse($resident);
 
         if (!$house) {
@@ -56,6 +62,10 @@ class BillController extends Controller
     {
         $resident = auth()->user()->resident;
 
+        if (!$resident) {
+            abort(403, __('Sila lengkapkan profil penduduk anda terlebih dahulu.'));
+        }
+
         // Verify access
         $membership = $resident->houseMemberships()
             ->where('house_id', $bill->house_id)
@@ -73,6 +83,10 @@ class BillController extends Controller
 
     private function getSelectedHouse($resident): ?House
     {
+        if (!$resident) {
+            return null;
+        }
+
         $selectedHouseId = session('selected_house_id');
 
         if ($selectedHouseId) {

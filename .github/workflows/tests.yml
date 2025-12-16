@@ -1,0 +1,86 @@
+name: Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+      - production
+  push:
+    branches-ignore:
+      - main
+      - production
+
+jobs:
+  tests:
+    name: Tests (PHP ${{ matrix.php-version }})
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        php-version: ['8.2', '8.3']
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, xml, ctype, json, sqlite, pdo_sqlite, dom, curl, libxml, mbstring, zip, pcntl, bcmath, soap, intl, gd, exif, iconv
+          coverage: xdebug
+
+      - name: Copy .env
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Install NPM dependencies
+        run: npm ci
+
+      - name: Build assets
+        run: npm run build
+
+      - name: Directory Permissions
+        run: chmod -R 777 storage bootstrap/cache
+
+      - name: Run database migrations
+        run: php artisan migrate --force
+
+      - name: Execute tests
+        run: php artisan test --coverage --min=80
+
+      - name: Upload coverage to Codecov
+        if: matrix.php-version == '8.2'
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          fail_ci_if_error: false
+
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: phpstan, php-cs-fixer
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-interaction
+
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse --memory-limit=2G || true
+
+      - name: Check code style
+        run: vendor/bin/php-cs-fixer fix --dry-run --diff || true
+

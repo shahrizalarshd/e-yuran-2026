@@ -68,7 +68,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
 
         // Houses (Super Admin only for CUD, others can view)
-        Route::resource('houses', HouseController::class);
+        Route::resource('houses', HouseController::class)->except(['store', 'update', 'destroy']);
+        Route::get('/houses/create', [HouseController::class, 'create'])->name('houses.create')->middleware('role:super_admin');
+        Route::post('/houses', [HouseController::class, 'store'])->name('houses.store')->middleware('role:super_admin');
+        Route::put('/houses/{house}', [HouseController::class, 'update'])->name('houses.update')->middleware('role:super_admin');
+        Route::delete('/houses/{house}', [HouseController::class, 'destroy'])->name('houses.destroy')->middleware('role:super_admin');
         Route::post('/houses/{house}/assign-owner', [HouseController::class, 'assignOwner'])
             ->name('houses.assign-owner')
             ->middleware('role:super_admin');

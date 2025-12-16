@@ -4,6 +4,9 @@ namespace App\Services;
 
 use App\Models\Bill;
 use App\Models\House;
+use App\Models\HouseOccupancy;
+use App\Models\MembershipFee;
+use App\Models\MembershipFeeConfiguration;
 use App\Models\FeeConfiguration;
 use App\Models\AuditLog;
 use App\Models\SystemNotification;
@@ -11,14 +14,20 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * BillingService - MODEL HIBRID
+ * 
+ * Yuran Keahlian: per OCCUPANCY (reset bila owner tukar)
+ * Yuran Tahunan: per RUMAH (inherit bila owner tukar)
+ */
 class BillingService
 {
     /**
-     * Generate bills for all billable houses for an entire year (12 months)
-     * This is called automatically on January 1st each year
+     * Generate yearly bills for all houses with active members
+     * MODEL HIBRID: Bil tahunan attach ke rumah, bukan occupancy
      * 
      * @param int $year The year to generate bills for
-     * @param float|null $customAmount Optional custom amount per month (if null, uses active fee config)
+     * @param float|null $customAmount Optional custom amount per month
      */
     public function generateYearlyBills(int $year, ?float $customAmount = null): array
     {
@@ -35,6 +44,7 @@ class BillingService
             ];
         }
 
+        // MODEL HIBRID: Get houses with active members (occupancy is_member = true)
         $houses = House::billable()->get();
         $totalGenerated = 0;
         $housesProcessed = 0;
@@ -67,10 +77,8 @@ class BillingService
                 "Generated {$totalGenerated} bills for {$housesProcessed} houses for year {$year} at RM " . number_format($amount, 2) . "/month"
             );
 
-            // Send notifications to all residents
+            // Send notifications
             $this->notifyResidentsYearlyBills($year, $amount);
-
-            // Notify admin/treasurer
             $this->notifyAdminYearlyBillsGenerated($year, $totalGenerated, $housesProcessed);
 
             Log::info("Yearly bills generated", [
@@ -104,11 +112,12 @@ class BillingService
 
     /**
      * Generate a bill for a specific house with a custom amount
+     * MODEL HIBRID: Bil attach ke house_id
      */
     private function generateBillForHouseWithAmount(House $house, int $year, int $month, float $amount, ?FeeConfiguration $feeConfig = null): ?Bill
     {
-        // Check if house is billable
-        if (!$house->is_billable) {
+        // Check if house has active member
+        if (!$house->is_member) {
             return null;
         }
 
@@ -119,10 +128,10 @@ class BillingService
             ->first();
 
         if ($existingBill) {
-            return null; // Bill already exists
+            return null;
         }
 
-        // Calculate due date (end of the billing month)
+        // Calculate due date
         $dueDate = now()->setYear($year)->setMonth($month)->endOfMonth();
 
         $bill = Bill::create([
@@ -137,13 +146,14 @@ class BillingService
             'due_date' => $dueDate,
         ]);
 
-        AuditLog::logCreate($bill, "Bill generated for house {$house->house_no}");
+        AuditLog::logCreate($bill, "Annual bill generated for house {$house->house_no}");
 
         return $bill;
     }
 
     /**
-     * Generate bills for a newly registered house from registration month to end of year
+     * Generate bills for a newly registered house
+     * MODEL HIBRID: Only generate if house has active member
      */
     public function generateBillsForNewHouse(House $house, int $fromMonth = null, int $year = null): array
     {
@@ -160,10 +170,11 @@ class BillingService
             ];
         }
 
-        if (!$house->is_billable) {
+        // Check if house has active member
+        if (!$house->is_member) {
             return [
                 'success' => false,
-                'message' => 'House is not billable',
+                'message' => 'House does not have an active member',
                 'generated' => 0,
             ];
         }
@@ -172,7 +183,6 @@ class BillingService
 
         DB::beginTransaction();
         try {
-            // Generate bills from registration month to December
             for ($month = $fromMonth; $month <= 12; $month++) {
                 $bill = $this->generateBillForHouse($house, $year, $month, $feeConfig);
                 if ($bill) {
@@ -185,10 +195,9 @@ class BillingService
             if ($generated > 0) {
                 AuditLog::logAction(
                     'generate_new_house_bills',
-                    "Generated {$generated} bills for new house {$house->house_no} ({$fromMonth}/{$year} - 12/{$year})"
+                    "Generated {$generated} annual bills for house {$house->house_no} ({$fromMonth}/{$year} - 12/{$year})"
                 );
 
-                // Notify the house owner if they have a user account
                 $this->notifyHouseOwnerNewBills($house, $year, $fromMonth, $generated, $feeConfig->amount);
             }
 
@@ -214,13 +223,157 @@ class BillingService
     }
 
     /**
-     * Notify all residents about yearly bills
+     * Generate membership fee for an occupancy
+     * MODEL HIBRID: Yuran keahlian per occupancy
+     */
+    public function generateMembershipFee(HouseOccupancy $occupancy): array
+    {
+        $config = MembershipFeeConfiguration::getActiveConfig();
+        
+        if (!$config) {
+            return [
+                'success' => false,
+                'message' => 'No active membership fee configuration found',
+            ];
+        }
+
+        // Check if already a member
+        if ($occupancy->is_member) {
+            return [
+                'success' => false,
+                'message' => 'Occupancy is already a member',
+            ];
+        }
+
+        DB::beginTransaction();
+        try {
+            $membershipFee = MembershipFee::createForOccupancy($occupancy, $config->amount);
+
+            DB::commit();
+
+            AuditLog::logAction(
+                'membership_fee_generated',
+                "Membership fee generated for occupancy {$occupancy->id}, amount: RM " . number_format($config->amount, 2)
+            );
+
+            return [
+                'success' => true,
+                'message' => 'Membership fee generated',
+                'membership_fee' => $membershipFee,
+            ];
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Membership fee generation failed', [
+                'occupancy_id' => $occupancy->id,
+                'error' => $e->getMessage(),
+            ]);
+            
+            return [
+                'success' => false,
+                'message' => 'Failed: ' . $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Register occupancy as member and generate bills
+     * MODEL HIBRID: Complete flow untuk daftar ahli baru
+     */
+    public function registerMember(HouseOccupancy $occupancy, float $membershipAmount): array
+    {
+        DB::beginTransaction();
+        try {
+            // 1. Register as member
+            $occupancy->registerAsMember($membershipAmount);
+
+            // 2. Generate annual bills for remaining year
+            $house = $occupancy->house;
+            $result = $this->generateBillsForNewHouse($house);
+
+            DB::commit();
+
+            AuditLog::logAction(
+                'member_registered',
+                "Occupancy {$occupancy->id} registered as member. Membership: RM " . number_format($membershipAmount, 2) . 
+                ". Annual bills generated: {$result['generated']}"
+            );
+
+            return [
+                'success' => true,
+                'message' => 'Member registered successfully',
+                'bills_generated' => $result['generated'],
+            ];
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Member registration failed', [
+                'occupancy_id' => $occupancy->id,
+                'error' => $e->getMessage(),
+            ]);
+            
+            return [
+                'success' => false,
+                'message' => 'Failed: ' . $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Handle ownership transfer
+     * MODEL HIBRID: Keahlian reset, bil tahunan kekal dengan rumah
+     */
+    public function handleOwnershipTransfer(House $house, HouseOccupancy $oldOwner, HouseOccupancy $newOwner): array
+    {
+        DB::beginTransaction();
+        try {
+            // 1. End old occupancy
+            $oldOwner->endOccupancy();
+
+            // 2. Bills stay with house (no action needed - MODEL HIBRID)
+            // Outstanding bills will be visible to new owner
+
+            // 3. Log audit
+            $outstandingAmount = $house->outstanding_amount;
+            
+            AuditLog::logAction(
+                'ownership_transfer',
+                "House {$house->house_no} transferred. Old owner occupancy: {$oldOwner->id}, New owner occupancy: {$newOwner->id}. " .
+                "Outstanding bills: RM " . number_format($outstandingAmount, 2) . " inherited by new owner."
+            );
+
+            DB::commit();
+
+            return [
+                'success' => true,
+                'message' => 'Ownership transferred successfully',
+                'outstanding_inherited' => $outstandingAmount,
+            ];
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Ownership transfer failed', [
+                'house_id' => $house->id,
+                'error' => $e->getMessage(),
+            ]);
+            
+            return [
+                'success' => false,
+                'message' => 'Failed: ' . $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Notify residents about yearly bills
      */
     private function notifyResidentsYearlyBills(int $year, float $monthlyAmount): void
     {
         $residents = User::where('role', 'resident')
             ->whereHas('resident', function ($q) {
-                $q->withActiveOccupancy();
+                $q->whereHas('occupancies', function ($oq) {
+                    $oq->active()->member();
+                });
             })
             ->get();
 
@@ -265,8 +418,13 @@ class BillingService
      */
     private function notifyHouseOwnerNewBills(House $house, int $year, int $fromMonth, int $billCount, float $amount): void
     {
-        $owner = $house->currentOwner();
-        if (!$owner || !$owner->user_id) {
+        $memberOccupancy = $house->activeMemberOccupancy();
+        if (!$memberOccupancy || !$memberOccupancy->resident) {
+            return;
+        }
+
+        $user = User::where('resident_id', $memberOccupancy->resident_id)->first();
+        if (!$user) {
             return;
         }
 
@@ -277,7 +435,7 @@ class BillingService
         ];
 
         SystemNotification::create([
-            'user_id' => $owner->user_id,
+            'user_id' => $user->id,
             'type' => 'new_house_bills',
             'title' => 'Bil Yuran Telah Dijana',
             'message' => "Bil yuran untuk rumah {$house->full_address} telah dijana dari {$months[$fromMonth]} hingga Disember {$year}. " .
@@ -307,6 +465,7 @@ class BillingService
             ];
         }
 
+        // MODEL HIBRID: Get houses with active members
         $houses = House::billable()->get();
         $generated = 0;
         $skipped = 0;
@@ -331,7 +490,7 @@ class BillingService
             }
         }
 
-        AuditLog::logAction('generate_bills', "Generated {$generated} bills for {$month}/{$year}");
+        AuditLog::logAction('generate_bills', "Generated {$generated} annual bills for {$month}/{$year}");
 
         return [
             'success' => true,
@@ -347,8 +506,8 @@ class BillingService
      */
     public function generateBillForHouse(House $house, int $year, int $month, ?FeeConfiguration $feeConfig = null): ?Bill
     {
-        // Check if house is billable
-        if (!$house->is_billable) {
+        // Check if house has active member
+        if (!$house->is_member) {
             return null;
         }
 
@@ -359,10 +518,9 @@ class BillingService
             ->first();
 
         if ($existingBill) {
-            return null; // Bill already exists
+            return null;
         }
 
-        // Get fee configuration if not provided
         if (!$feeConfig) {
             $feeConfig = FeeConfiguration::getFeeForDate(now()->setYear($year)->setMonth($month)->startOfMonth());
         }
@@ -371,7 +529,6 @@ class BillingService
             throw new \Exception('No active fee configuration found');
         }
 
-        // Calculate due date (end of the billing month)
         $dueDate = now()->setYear($year)->setMonth($month)->endOfMonth();
 
         $bill = Bill::create([
@@ -386,7 +543,7 @@ class BillingService
             'due_date' => $dueDate,
         ]);
 
-        AuditLog::logCreate($bill, "Bill generated for house {$house->house_no}");
+        AuditLog::logCreate($bill, "Annual bill generated for house {$house->house_no}");
 
         return $bill;
     }
@@ -425,12 +582,12 @@ class BillingService
 
     /**
      * Get system-wide statistics
+     * MODEL HIBRID: Updated to use new model
      */
     public function getStatistics(): array
     {
         $totalHouses = House::count();
-        $registeredHouses = House::registered()->count();
-        $billableHouses = House::billable()->count();
+        $housesWithMembers = House::billable()->count();
 
         $totalCollection = Bill::where('status', 'paid')->sum('paid_amount');
         $totalOutstanding = Bill::whereIn('status', ['unpaid', 'partial'])
@@ -444,15 +601,19 @@ class BillingService
 
         $overdueCount = Bill::overdue()->count();
 
+        // Membership statistics
+        $totalMembers = HouseOccupancy::active()->member()->count();
+        $membershipCollection = MembershipFee::paid()->sum('amount');
+
         return [
             'total_houses' => $totalHouses,
-            'registered_houses' => $registeredHouses,
-            'billable_houses' => $billableHouses,
+            'houses_with_members' => $housesWithMembers,
+            'total_members' => $totalMembers,
             'total_collection' => $totalCollection,
+            'membership_collection' => $membershipCollection,
             'total_outstanding' => $totalOutstanding,
             'current_month_collection' => $currentMonthCollection,
             'overdue_count' => $overdueCount,
         ];
     }
 }
-

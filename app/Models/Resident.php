@@ -49,6 +49,16 @@ class Resident extends Model
         });
     }
 
+    /**
+     * MODEL HIBRID: Residents with active member occupancy
+     */
+    public function scopeWithActiveMemberOccupancy($query)
+    {
+        return $query->whereHas('occupancies', function ($q) {
+            $q->active()->member();
+        });
+    }
+
     // Helper methods
     public function currentOccupancy()
     {
@@ -56,6 +66,29 @@ class Resident extends Model
             ->whereNull('end_date')
             ->with('house')
             ->first();
+    }
+
+    /**
+     * MODEL HIBRID: Get current member occupancy (if any)
+     */
+    public function currentMemberOccupancy()
+    {
+        return $this->occupancies()
+            ->active()
+            ->member()
+            ->with('house')
+            ->first();
+    }
+
+    /**
+     * MODEL HIBRID: Check if resident is a PPTT member
+     */
+    public function getIsMemberAttribute(): bool
+    {
+        return $this->occupancies()
+            ->active()
+            ->member()
+            ->exists();
     }
 
     public function activeMemberships()

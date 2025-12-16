@@ -7,6 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+/**
+ * Bill Model - Yuran Tahunan (Annual Fee)
+ * MODEL HIBRID: Bil attach ke RUMAH (house_id), bukan occupancy
+ * 
+ * Bila owner tukar, bil KEKAL dengan rumah (inherit)
+ */
 class Bill extends Model
 {
     use HasFactory;
@@ -23,6 +29,7 @@ class Bill extends Model
         'due_date',
         'paid_at',
         'is_legacy',
+        'paid_by_occupancy_id', // Audit trail: siapa yang bayar
     ];
 
     protected $casts = [
@@ -34,6 +41,10 @@ class Bill extends Model
     ];
 
     // Relationships
+
+    /**
+     * Bil attach ke rumah (MODEL HIBRID: yuran tahunan per rumah)
+     */
     public function house(): BelongsTo
     {
         return $this->belongsTo(House::class);
@@ -42,6 +53,14 @@ class Bill extends Model
     public function feeConfiguration(): BelongsTo
     {
         return $this->belongsTo(FeeConfiguration::class);
+    }
+
+    /**
+     * Occupancy yang bayar bil ini (untuk audit trail)
+     */
+    public function paidByOccupancy(): BelongsTo
+    {
+        return $this->belongsTo(HouseOccupancy::class, 'paid_by_occupancy_id');
     }
 
     public function payments(): BelongsToMany
@@ -135,18 +154,34 @@ class Bill extends Model
         };
     }
 
+    /**
+     * Get who paid this bill
+     */
+    public function getPaidByNameAttribute(): ?string
+    {
+        if ($this->paidByOccupancy && $this->paidByOccupancy->resident) {
+            return $this->paidByOccupancy->resident->name;
+        }
+        return null;
+    }
+
     // Helper methods
     public static function generateBillNo(int $year, int $month, int $houseId): string
     {
         return sprintf('BIL-%04d%02d-%05d', $year, $month, $houseId);
     }
 
-    public function markAsPaid(): void
+    /**
+     * Mark bill as paid
+     * MODEL HIBRID: Record siapa yang bayar untuk audit trail
+     */
+    public function markAsPaid(?HouseOccupancy $paidByOccupancy = null): void
     {
         $this->update([
             'status' => 'paid',
             'paid_amount' => $this->amount,
             'paid_at' => now(),
+            'paid_by_occupancy_id' => $paidByOccupancy?->id,
         ]);
     }
 
@@ -161,7 +196,7 @@ class Bill extends Model
             'status' => 'unpaid',
             'paid_amount' => 0,
             'paid_at' => null,
+            'paid_by_occupancy_id' => null,
         ]);
     }
 }
-

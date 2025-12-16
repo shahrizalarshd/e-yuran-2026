@@ -4,6 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#16a34a">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}">
+
     <title>e-Yuran - Taman Tropika Kajang</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -14,16 +19,8 @@
         <!-- Header -->
         <header class="p-4 lg:p-6">
             <div class="max-w-7xl mx-auto flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
-                        <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                        </svg>
-                    </div>
-                    <div class="text-white">
-                        <h1 class="font-bold text-lg leading-tight">e-Yuran</h1>
-                        <p class="text-xs text-primary-200 leading-tight">Taman Tropika Kajang</p>
-                    </div>
+                <div class="flex items-center">
+                    <img src="{{ asset('images/logo.png') }}" alt="PPTTK" class="h-12 w-auto bg-white rounded-lg p-1">
                 </div>
                 <div class="flex items-center gap-2">
                     <a href="{{ route('language.switch', 'bm') }}" class="px-3 py-1.5 rounded-lg text-sm {{ app()->getLocale() === 'bm' ? 'bg-white text-primary-700 font-medium' : 'text-white/80 hover:text-white' }}">BM</a>
@@ -37,10 +34,8 @@
             <div class="max-w-md w-full">
                 <!-- Hero -->
                 <div class="text-center text-white mb-8">
-                    <div class="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
-                        <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
+                    <div class="w-32 h-32 bg-white rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl p-3">
+                        <img src="{{ asset('images/logo.png') }}" alt="Persatuan Penduduk Taman Tropika Kajang" class="w-full h-full object-contain">
                     </div>
                     <h2 class="text-3xl lg:text-4xl font-extrabold mb-3">{{ __('Sistem e-Yuran') }}</h2>
                     <p class="text-primary-100 text-lg">{{ __('Kutipan yuran perumahan yang telus dan mudah') }}</p>

@@ -51,7 +51,7 @@ class HouseController extends Controller
     {
         $validated = $request->validate([
             'house_no' => 'required|string|max:20',
-            'street_name' => 'required|string|max:100',
+            'street_name' => 'required|in:Jalan Tropika 2,Jalan Tropika 3,Jalan Tropika 4,Jalan Tropika 5',
             'is_registered' => 'boolean',
             'is_active' => 'boolean',
             'status' => 'required|in:occupied,vacant',
@@ -247,7 +247,7 @@ class HouseController extends Controller
     {
         $validated = $request->validate([
             'house_no' => 'required|string|max:20',
-            'street_name' => 'required|string|max:100',
+            'street_name' => 'required|in:Jalan Tropika 2,Jalan Tropika 3,Jalan Tropika 4,Jalan Tropika 5',
             'is_registered' => 'boolean',
             'is_active' => 'boolean',
             'status' => 'required|in:occupied,vacant',

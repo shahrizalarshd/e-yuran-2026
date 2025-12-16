@@ -6,6 +6,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#16a34a">
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}">
+
     <title>@hasSection('title')@yield('title')@else{{ $title ?? config('app.name', 'e-Yuran') }}@endif - Taman Tropika Kajang</title>
 
     <!-- Fonts -->

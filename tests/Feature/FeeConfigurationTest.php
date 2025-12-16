@@ -218,13 +218,13 @@ class FeeConfigurationTest extends TestCase
         $this->assertDatabaseMissing('fee_configurations', ['id' => $fee->id]);
     }
 
-    public function test_treasurer_cannot_manage_fees(): void
+    public function test_treasurer_can_manage_fees(): void
     {
         $treasurer = User::factory()->treasurer()->create();
 
         $response = $this->actingAs($treasurer)->get('/admin/fees');
 
-        $response->assertStatus(403);
+        $response->assertStatus(200);
     }
 
     public function test_auditor_cannot_manage_fees(): void

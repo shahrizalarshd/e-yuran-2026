@@ -54,8 +54,9 @@
 </head>
 <body>
     <div class="header">
+        <img src="{{ asset('images/logo.png') }}" alt="PPTTK" style="height: 80px; width: auto; margin-bottom: 15px; background: white; padding: 10px; border-radius: 10px;">
         <h1 style="margin: 0;">✓ Pendaftaran Diluluskan</h1>
-        <p style="margin: 10px 0 0 0; opacity: 0.9;">{{ config('app.name') }}</p>
+        <p style="margin: 10px 0 0 0; opacity: 0.9;">Persatuan Penduduk Taman Tropika Kajang</p>
     </div>
     
     <div class="content">
@@ -89,8 +90,9 @@
     </div>
     
     <div class="footer">
+        <img src="{{ asset('images/logo.png') }}" alt="PPTTK" style="height: 50px; width: auto; margin-bottom: 10px;">
         <p>E-mel ini dihantar secara automatik. Sila jangan balas e-mel ini.</p>
-        <p>&copy; {{ date('Y') }} {{ config('app.name') }}. Hak Cipta Terpelihara.</p>
+        <p>&copy; {{ date('Y') }} Persatuan Penduduk Taman Tropika Kajang. Hak Cipta Terpelihara.</p>
     </div>
 </body>
 </html>

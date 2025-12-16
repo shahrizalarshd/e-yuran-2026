@@ -34,12 +34,12 @@
                 </div>
             </div>
 
-            <!-- Registered Houses -->
+            <!-- Houses with Active Members (MODEL HIBRID) -->
             <div class="bg-white rounded-xl p-4 lg:p-6 shadow-sm">
                 <div class="flex items-start justify-between">
                     <div>
-                        <p class="text-sm text-gray-500">{{ __('messages.registered_houses') }}</p>
-                        <p class="text-xl lg:text-2xl font-bold text-gray-900 mt-1">{{ $stats['registered_houses'] }}/{{ $stats['total_houses'] }}</p>
+                        <p class="text-sm text-gray-500">{{ __('messages.member_houses') }}</p>
+                        <p class="text-xl lg:text-2xl font-bold text-gray-900 mt-1">{{ $stats['houses_with_members'] ?? 0 }}/{{ $stats['total_houses'] }}</p>
                     </div>
                     <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                         <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

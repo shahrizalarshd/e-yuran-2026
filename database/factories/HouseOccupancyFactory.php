@@ -26,6 +26,10 @@ class HouseOccupancyFactory extends Factory
             'start_date' => now()->subMonths(fake()->numberBetween(1, 24)),
             'end_date' => null,
             'is_payer' => true,
+            // MODEL HIBRID: Membership fields
+            'is_member' => false,
+            'membership_fee_paid_at' => null,
+            'membership_fee_amount' => null,
         ];
     }
 
@@ -81,5 +85,36 @@ class HouseOccupancyFactory extends Factory
             'end_date' => null,
         ]);
     }
-}
 
+    /**
+     * MODEL HIBRID: Occupancy that is a registered PPTT member
+     */
+    public function member(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_member' => true,
+            'membership_fee_paid_at' => now()->subMonths(fake()->numberBetween(1, 12)),
+            'membership_fee_amount' => 20.00,
+        ]);
+    }
+
+    /**
+     * MODEL HIBRID: Occupancy that is not a member
+     */
+    public function notMember(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_member' => false,
+            'membership_fee_paid_at' => null,
+            'membership_fee_amount' => null,
+        ]);
+    }
+
+    /**
+     * MODEL HIBRID: Active owner who is a member (billable)
+     */
+    public function activeMember(): static
+    {
+        return $this->owner()->active()->member();
+    }
+}

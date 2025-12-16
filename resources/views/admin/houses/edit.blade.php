@@ -23,7 +23,13 @@
 
                     <div>
                         <label for="street_name" class="block text-sm font-medium text-gray-700 mb-1">{{ __('messages.street_name') }} <span class="text-red-500">*</span></label>
-                        <input type="text" name="street_name" id="street_name" value="{{ old('street_name', $house->street_name) }}" required class="w-full rounded-lg border-gray-300 focus:border-primary-500 focus:ring-primary-500">
+                        <select name="street_name" id="street_name" required class="w-full rounded-lg border-gray-300 focus:border-primary-500 focus:ring-primary-500">
+                            <option value="">-- Pilih Jalan --</option>
+                            <option value="Jalan Tropika 2" {{ old('street_name', $house->street_name) === 'Jalan Tropika 2' ? 'selected' : '' }}>Jalan Tropika 2</option>
+                            <option value="Jalan Tropika 3" {{ old('street_name', $house->street_name) === 'Jalan Tropika 3' ? 'selected' : '' }}>Jalan Tropika 3</option>
+                            <option value="Jalan Tropika 4" {{ old('street_name', $house->street_name) === 'Jalan Tropika 4' ? 'selected' : '' }}>Jalan Tropika 4</option>
+                            <option value="Jalan Tropika 5" {{ old('street_name', $house->street_name) === 'Jalan Tropika 5' ? 'selected' : '' }}>Jalan Tropika 5</option>
+                        </select>
                         @error('street_name')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror

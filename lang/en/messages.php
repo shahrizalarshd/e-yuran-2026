@@ -78,6 +78,7 @@ return [
     'house_details' => 'House Details',
     'total_houses' => 'Total Houses',
     'registered_houses' => 'Registered Houses',
+    'member_houses' => 'Active Member Houses',
     'active_houses' => 'Active Houses',
     
     // Resident / Member

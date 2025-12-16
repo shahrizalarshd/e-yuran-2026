@@ -4,6 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}">
+
     <title>{{ __('Sahkan Emel') }} - e-Yuran</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=plus-jakarta-sans:400,500,600,700&display=swap" rel="stylesheet" />
@@ -14,16 +19,8 @@
         <div class="max-w-md w-full mx-auto">
             <!-- Logo -->
             <div class="text-center mb-8">
-                <a href="{{ route('home') }}" class="inline-flex items-center gap-3">
-                    <div class="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                        </svg>
-                    </div>
-                    <div class="text-left">
-                        <h1 class="font-bold text-xl text-gray-900">e-Yuran</h1>
-                        <p class="text-xs text-gray-500">Taman Tropika Kajang</p>
-                    </div>
+                <a href="{{ route('home') }}" class="inline-block">
+                    <img src="{{ asset('images/logo.png') }}" alt="Persatuan Penduduk Taman Tropika Kajang" class="h-24 w-auto mx-auto">
                 </a>
             </div>
 

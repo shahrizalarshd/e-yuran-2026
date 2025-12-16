@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\House>
+ * 
+ * MODEL HIBRID: House adalah entiti fizikal
+ * is_member adalah derived dari occupancy aktif yang is_member = true
  */
 class HouseFactory extends Factory
 {
@@ -18,16 +21,16 @@ class HouseFactory extends Factory
     public function definition(): array
     {
         $streetNames = [
-            'Jalan Tropika 1',
             'Jalan Tropika 2', 
             'Jalan Tropika 3',
             'Jalan Tropika 4',
-            'Jalan Tropika Utama',
+            'Jalan Tropika 5',
         ];
 
         return [
             'house_no' => fake()->unique()->numberBetween(1, 500),
             'street_name' => fake()->randomElement($streetNames),
+            // Keep for backward compatibility
             'is_registered' => true,
             'is_active' => true,
             'status' => 'occupied',
@@ -35,6 +38,7 @@ class HouseFactory extends Factory
     }
 
     /**
+     * @deprecated Use withActiveMember() instead
      * House that is registered and active (billable)
      */
     public function billable(): static
@@ -46,6 +50,7 @@ class HouseFactory extends Factory
     }
 
     /**
+     * @deprecated Use without occupancy instead
      * House that is not registered
      */
     public function unregistered(): static
@@ -57,6 +62,7 @@ class HouseFactory extends Factory
     }
 
     /**
+     * @deprecated 
      * House that is inactive
      */
     public function inactive(): static
@@ -76,5 +82,14 @@ class HouseFactory extends Factory
             'status' => 'vacant',
         ]);
     }
-}
 
+    /**
+     * Occupied house
+     */
+    public function occupied(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'occupied',
+        ]);
+    }
+}

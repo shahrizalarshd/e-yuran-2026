@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Models\Bill;
 use App\Models\House;
 use App\Models\HouseMember;
+use App\Models\HouseOccupancy;
 use App\Models\Payment;
+use App\Models\Resident;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -13,6 +15,23 @@ use Tests\TestCase;
 class AdminDashboardTest extends TestCase
 {
     use RefreshDatabase;
+
+    /**
+     * Helper to create a billable house (with active member occupancy)
+     * MODEL HIBRID: House is billable when it has an active member occupancy
+     */
+    private function createBillableHouse(): House
+    {
+        $house = House::factory()->create();
+        $resident = Resident::factory()->create();
+        
+        HouseOccupancy::factory()->activeMember()->create([
+            'house_id' => $house->id,
+            'resident_id' => $resident->id,
+        ]);
+
+        return $house->fresh();
+    }
 
     // ==========================================
     // A. DASHBOARD ACCESS TESTS
@@ -71,7 +90,7 @@ class AdminDashboardTest extends TestCase
     public function test_dashboard_shows_collection_data(): void
     {
         $admin = User::factory()->superAdmin()->create();
-        $house = House::factory()->billable()->create();
+        $house = $this->createBillableHouse();
         
         Bill::factory()->paid()->create([
             'house_id' => $house->id,
@@ -87,7 +106,7 @@ class AdminDashboardTest extends TestCase
     public function test_dashboard_shows_outstanding_amount(): void
     {
         $admin = User::factory()->superAdmin()->create();
-        $house = House::factory()->billable()->create();
+        $house = $this->createBillableHouse();
         
         Bill::factory()->unpaid()->create([
             'house_id' => $house->id,
@@ -229,7 +248,10 @@ class AdminDashboardTest extends TestCase
         $viewResponse->assertStatus(200);
 
         // Auditor cannot generate bills
-        $generateResponse = $this->actingAs($auditor)->post('/admin/bills/generate');
+        $generateResponse = $this->actingAs($auditor)->post('/admin/bills/generate-yearly', [
+            'year' => now()->year,
+            'amount' => 20.00,
+        ]);
         $generateResponse->assertStatus(403);
     }
 }

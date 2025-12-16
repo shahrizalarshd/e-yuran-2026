@@ -16,6 +16,23 @@ class HouseTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Helper to create a billable house (with active member occupancy)
+     * MODEL HIBRID: House is billable when it has an active member occupancy
+     */
+    private function createBillableHouse(): House
+    {
+        $house = House::factory()->create();
+        $resident = Resident::factory()->create();
+        
+        HouseOccupancy::factory()->activeMember()->create([
+            'house_id' => $house->id,
+            'resident_id' => $resident->id,
+        ]);
+
+        return $house->fresh();
+    }
+
     // ==========================================
     // A. HOUSE MODEL TESTS
     // ==========================================
@@ -43,54 +60,85 @@ class HouseTest extends TestCase
         $this->assertEquals('123, Jalan Tropika 1', $house->full_address);
     }
 
-    public function test_house_is_billable_when_registered_and_active(): void
+    /**
+     * MODEL HIBRID: House is billable when it has an active member occupancy
+     */
+    public function test_house_is_billable_when_has_active_member(): void
     {
-        $house = House::factory()->billable()->create();
+        $house = $this->createBillableHouse();
 
         $this->assertTrue($house->is_billable);
+        $this->assertTrue($house->is_member);
     }
 
-    public function test_house_is_not_billable_when_unregistered(): void
+    /**
+     * MODEL HIBRID: House is not billable when no active member
+     */
+    public function test_house_is_not_billable_when_no_member(): void
     {
-        $house = House::factory()->unregistered()->create();
+        $house = House::factory()->create();
+        $resident = Resident::factory()->create();
+        
+        // Create active occupancy but NOT a member
+        HouseOccupancy::factory()->active()->notMember()->create([
+            'house_id' => $house->id,
+            'resident_id' => $resident->id,
+        ]);
 
-        $this->assertFalse($house->is_billable);
+        $this->assertFalse($house->fresh()->is_billable);
     }
 
-    public function test_house_is_not_billable_when_inactive(): void
+    public function test_house_is_not_billable_when_occupancy_ended(): void
     {
-        $house = House::factory()->inactive()->create();
+        $house = House::factory()->create();
+        $resident = Resident::factory()->create();
+        
+        // Create ended member occupancy
+        HouseOccupancy::factory()->member()->ended()->create([
+            'house_id' => $house->id,
+            'resident_id' => $resident->id,
+        ]);
 
-        $this->assertFalse($house->is_billable);
+        $this->assertFalse($house->fresh()->is_billable);
     }
 
     // ==========================================
-    // B. HOUSE SCOPES TESTS
+    // B. HOUSE SCOPES TESTS (MODEL HIBRID)
     // ==========================================
 
-    public function test_house_registered_scope(): void
-    {
-        House::factory()->count(3)->billable()->create();
-        House::factory()->count(2)->unregistered()->create();
-
-        $this->assertEquals(3, House::registered()->count());
-    }
-
-    public function test_house_active_scope(): void
-    {
-        House::factory()->count(3)->billable()->create();
-        House::factory()->count(2)->inactive()->create();
-
-        $this->assertEquals(3, House::active()->count());
-    }
-
+    /**
+     * MODEL HIBRID: billable scope returns houses with active member occupancy
+     */
     public function test_house_billable_scope(): void
     {
-        House::factory()->count(3)->billable()->create();
-        House::factory()->unregistered()->create();
-        House::factory()->inactive()->create();
+        // Create 3 billable houses
+        for ($i = 0; $i < 3; $i++) {
+            $this->createBillableHouse();
+        }
+        
+        // Create non-billable house (no member)
+        $house1 = House::factory()->create();
+        HouseOccupancy::factory()->active()->notMember()->create([
+            'house_id' => $house1->id,
+        ]);
+        
+        // Create house with no occupancy
+        House::factory()->create();
 
         $this->assertEquals(3, House::billable()->count());
+    }
+
+    public function test_house_with_active_member_scope(): void
+    {
+        // Create 2 houses with active members
+        for ($i = 0; $i < 2; $i++) {
+            $this->createBillableHouse();
+        }
+        
+        // Create house without member
+        House::factory()->create();
+
+        $this->assertEquals(2, House::withActiveMember()->count());
     }
 
     // ==========================================
@@ -179,6 +227,18 @@ class HouseTest extends TestCase
         $payer = $house->currentPayer();
         $this->assertNotNull($payer);
         $this->assertTrue($payer->is_payer);
+    }
+
+    /**
+     * MODEL HIBRID: Test activeMemberOccupancy helper
+     */
+    public function test_house_active_member_occupancy(): void
+    {
+        $house = $this->createBillableHouse();
+
+        $memberOccupancy = $house->activeMemberOccupancy();
+        $this->assertNotNull($memberOccupancy);
+        $this->assertTrue($memberOccupancy->is_member);
     }
 
     // ==========================================
@@ -271,7 +331,7 @@ class HouseTest extends TestCase
 
         $response = $this->actingAs($admin)->post('/admin/houses', [
             'house_no' => 'A101',
-            'street_name' => 'Jalan Tropika 1',
+            'street_name' => 'Jalan Tropika 2',
             'is_registered' => true,
             'is_active' => true,
             'status' => 'occupied',
@@ -327,14 +387,14 @@ class HouseTest extends TestCase
 
         $response = $this->actingAs($auditor)->post('/admin/houses', [
             'house_no' => 'A101',
-            'street_name' => 'Jalan Tropika 1',
+            'street_name' => 'Jalan Tropika 2',
             'is_registered' => true,
             'is_active' => true,
             'status' => 'occupied',
         ]);
 
-        // Either 403 Forbidden or redirect with error
-        $this->assertTrue(in_array($response->status(), [403, 302]));
+        // Should be 403 Forbidden (authorization check before validation)
+        $response->assertStatus(403);
     }
 
     public function test_treasurer_can_view_houses(): void
@@ -346,4 +406,3 @@ class HouseTest extends TestCase
         $response->assertStatus(200);
     }
 }
-
