@@ -1,0 +1,73 @@
+# ============================================
+# E-YURAN PPTT - Docker Ignore
+# Files yang tidak perlu dalam Docker image
+# ============================================
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+
+# Dependencies (akan di-install dalam container)
+/node_modules
+/vendor
+
+# Build files (akan di-build dalam container)
+/public/build
+/public/hot
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+/storage/logs/*
+!/storage/logs/.gitkeep
+
+# Cache
+/storage/framework/cache/*
+!/storage/framework/cache/.gitkeep
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitkeep
+/storage/framework/views/*
+!/storage/framework/views/.gitkeep
+/bootstrap/cache/*
+!/bootstrap/cache/.gitkeep
+
+# Testing
+/tests
+phpunit.xml
+.phpunit.result.cache
+/coverage
+
+# Documentation
+*.md
+!README.md
+
+# Docker files (tidak perlu dalam image)
+docker-compose*.yml
+Dockerfile*
+
+# CI/CD
+.github
+
+# Excel files (data)
+*.xlsx
+*.xls
+
+# SQLite (development)
+/database/*.sqlite
+
+# Misc
+*.log
+*.txt
+!robots.txt
+

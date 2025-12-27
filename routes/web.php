@@ -18,6 +18,24 @@ use App\Http\Controllers\Resident\BillController as ResidentBillController;
 use App\Http\Controllers\Resident\PaymentController as ResidentPaymentController;
 use App\Http\Controllers\Resident\HouseSettingsController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
+
+// Health check endpoint for Docker
+Route::get('/health', function () {
+    try {
+        DB::connection()->getPdo();
+        return response()->json([
+            'status' => 'ok',
+            'timestamp' => now()->toISOString(),
+            'database' => 'connected'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Database connection failed'
+        ], 503);
+    }
+})->name('health');
 
 // Welcome page
 Route::get('/', function () {
