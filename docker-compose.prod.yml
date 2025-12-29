@@ -33,15 +33,11 @@ services:
       - TOYYIBPAY_SANDBOX=${TOYYIBPAY_SANDBOX:-false}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
-      # Mail Configuration (cPanel SMTP)
-      - MAIL_MAILER=${MAIL_MAILER:-smtp}
-      - MAIL_HOST=${MAIL_HOST:-mail.pptt.my}
-      - MAIL_PORT=${MAIL_PORT:-465}
-      - MAIL_USERNAME=${MAIL_USERNAME:-noreply@pptt.my}
-      - MAIL_PASSWORD=${MAIL_PASSWORD}
-      - MAIL_ENCRYPTION=${MAIL_ENCRYPTION:-ssl}
-      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-noreply@pptt.my}
+      # Mail Configuration (Resend API)
+      - MAIL_MAILER=${MAIL_MAILER:-resend}
+      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-onboarding@resend.dev}
       - MAIL_FROM_NAME=${MAIL_FROM_NAME:-e-Yuran PPTT}
+      - RESEND_API_KEY=${RESEND_API_KEY}
     volumes:
       - ./.env:/var/www/html/.env:ro
       - app-storage:/var/www/html/storage/app
