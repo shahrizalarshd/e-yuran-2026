@@ -42,7 +42,7 @@ class ToyyibPayService
         $data = [
             'userSecretKey' => $this->secretKey,
             'categoryCode' => $this->categoryCode,
-            'billName' => 'Yuran Bulanan - ' . $house->full_address,
+            'billName' => 'Yuran PPTT #' . $house->house_no, // Max 30 chars
             'billDescription' => $billDetails['description'] ?? 'Pembayaran yuran perumahan',
             'billPriceSetting' => 1, // Fixed price
             'billPayorInfo' => 1, // Required
