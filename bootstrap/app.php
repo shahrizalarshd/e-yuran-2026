@@ -11,24 +11,24 @@ use App\Services\TelegramService;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        commands: __DIR__.'/../routes/console.php',
+        web: __DIR__ . '/../routes/web.php',
+        commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             SetLocale::class,
         ]);
-        
+
         $middleware->alias([
             'role' => CheckRole::class,
             'admin' => CheckAdmin::class,
         ]);
     })
     ->withSchedule(function (Schedule $schedule): void {
-        // Generate yearly bills on January 1st at 00:01 AM
+        // Generate yearly bills on January 15th at 00:01 AM
         $schedule->command('bills:generate-yearly')
-            ->yearlyOn(1, 1, '00:01')
+            ->yearlyOn(1, 15, '00:01')
             ->withoutOverlapping()
             ->onOneServer()
             ->appendOutputTo(storage_path('logs/yearly-bills.log'));
