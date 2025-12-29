@@ -71,7 +71,8 @@ class ToyyibPayService
         ]);
 
         try {
-            $response = Http::timeout(30)
+            $response = Http::connectTimeout(5)  // Connection timeout 5s
+                ->timeout(15)                     // Read timeout 15s
                 ->asForm()
                 ->post($this->baseUrl . '/index.php/api/createBill', $data);
 
