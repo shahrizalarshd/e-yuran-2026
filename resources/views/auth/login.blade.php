@@ -86,31 +86,6 @@
                     <a href="{{ route('register') }}" class="text-primary-600 font-medium hover:text-primary-800">{{ __('messages.register') }}</a>
                 </p>
             </div>
-
-            <!-- Demo Accounts -->
-            <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-                <p class="text-sm font-medium text-amber-800 mb-3 flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    {{ __('Akaun Demo') }}
-                </p>
-                <div class="space-y-2">
-                    <button type="button" onclick="document.getElementById('email').value='admin@tropika.my';document.getElementById('password').value='password';" class="w-full text-left p-2 bg-white rounded-lg border border-amber-200 hover:border-amber-400 hover:bg-amber-50 transition text-xs">
-                        <span class="inline-block w-20 font-semibold text-amber-900">Admin</span>
-                        <span class="text-amber-700">admin@tropika.my</span>
-                    </button>
-                    <button type="button" onclick="document.getElementById('email').value='bendahari@tropika.my';document.getElementById('password').value='password';" class="w-full text-left p-2 bg-white rounded-lg border border-amber-200 hover:border-amber-400 hover:bg-amber-50 transition text-xs">
-                        <span class="inline-block w-20 font-semibold text-amber-900">Bendahari</span>
-                        <span class="text-amber-700">bendahari@tropika.my</span>
-                    </button>
-                    <button type="button" onclick="document.getElementById('email').value='ahmad1@gmail.com';document.getElementById('password').value='password';" class="w-full text-left p-2 bg-white rounded-lg border border-amber-200 hover:border-amber-400 hover:bg-amber-50 transition text-xs">
-                        <span class="inline-block w-20 font-semibold text-amber-900">Penduduk</span>
-                        <span class="text-amber-700">ahmad1@gmail.com</span>
-                    </button>
-                </div>
-                <p class="text-xs text-amber-600 mt-2">{{ __('Klik untuk auto-fill. Password: password') }}</p>
-            </div>
         </div>
     </div>
 </body>

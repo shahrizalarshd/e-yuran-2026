@@ -64,9 +64,9 @@ class DatabaseSeeder extends Seeder
     {
         // Super Admin
         User::create([
-            'name' => 'Admin',
-            'email' => 'admin@tropika.my',
-            'password' => Hash::make('password'),
+            'name' => 'Admin Utama PPTT',
+            'email' => 'admin@pptt.my',
+            'password' => Hash::make('PPTTMY@2026'),
             'role' => 'super_admin',
             'language_preference' => 'bm',
             'is_active' => true,
@@ -75,9 +75,9 @@ class DatabaseSeeder extends Seeder
 
         // Treasurer
         User::create([
-            'name' => 'Bendahari',
-            'email' => 'bendahari@tropika.my',
-            'password' => Hash::make('password'),
+            'name' => 'Bendahari PPTT',
+            'email' => 'bendahari@pptt.my',
+            'password' => Hash::make('PPTTMY@2026'),
             'role' => 'treasurer',
             'language_preference' => 'bm',
             'is_active' => true,
@@ -86,9 +86,9 @@ class DatabaseSeeder extends Seeder
 
         // Auditor
         User::create([
-            'name' => 'Pemeriksa',
-            'email' => 'auditor@tropika.my',
-            'password' => Hash::make('password'),
+            'name' => 'Pemeriksa PPTT',
+            'email' => 'auditor@pptt.my',
+            'password' => Hash::make('PPTTMY@2026'),
             'role' => 'auditor',
             'language_preference' => 'bm',
             'is_active' => true,
@@ -122,9 +122,9 @@ class DatabaseSeeder extends Seeder
     {
         // Create a sample resident user
         $user = User::create([
-            'name' => 'Penduduk',
-            'email' => 'ahmad1@gmail.com',
-            'password' => Hash::make('password'),
+            'name' => 'Penduduk Demo',
+            'email' => 'penduduk@pptt.my',
+            'password' => Hash::make('PPTTMY@2026'),
             'role' => 'resident',
             'language_preference' => 'bm',
             'is_active' => true,
@@ -134,8 +134,8 @@ class DatabaseSeeder extends Seeder
         // Create resident profile
         $resident = Resident::create([
             'user_id' => $user->id,
-            'name' => 'Ahmad bin Abdullah',
-            'email' => 'ahmad1@gmail.com',
+            'name' => 'Penduduk Demo',
+            'email' => 'penduduk@pptt.my',
             'phone' => '0123456789',
             'ic_number' => '800101-01-1234',
             'language_preference' => 'bm',

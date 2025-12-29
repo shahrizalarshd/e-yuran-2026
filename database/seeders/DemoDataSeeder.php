@@ -99,9 +99,9 @@ class DemoDataSeeder extends Seeder
     {
         // Super Admin
         $superAdmin = User::create([
-            'name' => 'Admin Utama',
-            'email' => 'admin@tropika.my',
-            'password' => Hash::make('password'),
+            'name' => 'Admin Utama PPTT',
+            'email' => 'admin@pptt.my',
+            'password' => Hash::make('PPTTMY@2026'),
             'role' => 'super_admin',
             'language_preference' => 'bm',
             'is_active' => true,
@@ -110,9 +110,9 @@ class DemoDataSeeder extends Seeder
 
         // Treasurer
         $treasurer = User::create([
-            'name' => 'En. Ahmad (Bendahari)',
-            'email' => 'bendahari@tropika.my',
-            'password' => Hash::make('password'),
+            'name' => 'Bendahari PPTT',
+            'email' => 'bendahari@pptt.my',
+            'password' => Hash::make('PPTTMY@2026'),
             'role' => 'treasurer',
             'language_preference' => 'bm',
             'is_active' => true,
@@ -121,9 +121,9 @@ class DemoDataSeeder extends Seeder
 
         // Auditor
         $auditor = User::create([
-            'name' => 'Pn. Fatimah (Pemeriksa)',
-            'email' => 'auditor@tropika.my',
-            'password' => Hash::make('password'),
+            'name' => 'Pemeriksa PPTT',
+            'email' => 'auditor@pptt.my',
+            'password' => Hash::make('PPTTMY@2026'),
             'role' => 'auditor',
             'language_preference' => 'bm',
             'is_active' => true,
@@ -229,6 +229,7 @@ class DemoDataSeeder extends Seeder
     private function seedResidentsAndMemberships(array $houses): void
     {
         $names = [
+            ['Penduduk Demo', 'penduduk@pptt.my'],
             ['Ahmad bin Hassan', 'ahmad1@gmail.com'],
             ['Siti Aminah binti Ali', 'siti2@gmail.com'],
             ['Muhammad Faiz bin Ibrahim', 'faiz3@gmail.com'],
@@ -248,7 +249,6 @@ class DemoDataSeeder extends Seeder
             ['Jamal bin Isa', 'jamal17@gmail.com'],
             ['Mariam binti Yusuf', 'mariam18@gmail.com'],
             ['Nasir bin Latif', 'nasir19@gmail.com'],
-            ['Sarina binti Rahman', 'sarina20@gmail.com'],
         ];
 
         foreach ($houses as $index => $house) {
@@ -258,7 +258,7 @@ class DemoDataSeeder extends Seeder
             $user = User::create([
                 'name' => $nameData[0],
                 'email' => $nameData[1],
-                'password' => Hash::make('password'),
+                'password' => Hash::make('PPTTMY@2026'),
                 'role' => 'resident',
                 'language_preference' => 'bm',
                 'is_active' => true,
@@ -302,7 +302,7 @@ class DemoDataSeeder extends Seeder
                 $spouseUser = User::create([
                     'name' => 'Pasangan ' . $nameData[0],
                     'email' => 'spouse_' . $nameData[1],
-                    'password' => Hash::make('password'),
+                    'password' => Hash::make('PPTTMY@2026'),
                     'role' => 'resident',
                     'language_preference' => 'bm',
                     'is_active' => true,
@@ -642,10 +642,10 @@ class DemoDataSeeder extends Seeder
         $this->command->newLine();
         $this->command->info('🔑 LOGIN CREDENTIALS:');
         $this->command->info('-' . str_repeat('-', 50));
-        $this->command->line('Super Admin : admin@tropika.my / password');
-        $this->command->line('Bendahari   : bendahari@tropika.my / password');
-        $this->command->line('Pemeriksa   : auditor@tropika.my / password');
-        $this->command->line('Penduduk    : ahmad1@gmail.com / password');
+        $this->command->line('Super Admin : admin@pptt.my / PPTTMY@2026');
+        $this->command->line('Bendahari   : bendahari@pptt.my / PPTTMY@2026');
+        $this->command->line('Pemeriksa   : auditor@pptt.my / PPTTMY@2026');
+        $this->command->line('Penduduk    : penduduk@pptt.my / PPTTMY@2026');
         $this->command->newLine();
         $this->command->info('✅ Seeding selesai!');
     }
