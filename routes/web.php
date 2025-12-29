@@ -193,6 +193,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/payments', [ResidentPaymentController::class, 'index'])->name('payments.index');
         Route::get('/payments/create', [ResidentPaymentController::class, 'create'])->name('payments.create');
         Route::post('/payments/confirm', [ResidentPaymentController::class, 'confirm'])->name('payments.confirm');
+        Route::get('/payments/confirm', function() {
+            return redirect()->route('resident.payments.create')->with('info', 'Sila pilih bil untuk bayar terlebih dahulu.');
+        });
         Route::post('/payments', [ResidentPaymentController::class, 'store'])->name('payments.store');
         Route::get('/payments/{payment}', [ResidentPaymentController::class, 'show'])->name('payments.show');
 
