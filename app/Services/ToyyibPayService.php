@@ -62,8 +62,27 @@ class ToyyibPayService
             'billExpiryDays' => 7,
         ];
 
+        // Log request data (excluding sensitive info)
+        Log::info('ToyyibPay createBill request', [
+            'payment_id' => $payment->id,
+            'amount' => $data['billAmount'],
+            'category' => substr($this->categoryCode, 0, 4) . '...',
+            'base_url' => $this->baseUrl,
+        ]);
+
         try {
-            $response = Http::asForm()->post($this->baseUrl . '/index.php/api/createBill', $data);
+            $response = Http::timeout(30)
+                ->asForm()
+                ->post($this->baseUrl . '/index.php/api/createBill', $data);
+
+            $statusCode = $response->status();
+            $body = $response->body();
+
+            Log::info('ToyyibPay createBill response', [
+                'payment_id' => $payment->id,
+                'status' => $statusCode,
+                'body' => substr($body, 0, 200),
+            ]);
 
             if ($response->successful()) {
                 $result = $response->json();
@@ -74,13 +93,19 @@ class ToyyibPayService
                     // Update payment with billcode
                     $payment->update(['toyyibpay_billcode' => $billCode]);
                     
+                    Log::info('ToyyibPay bill created successfully', [
+                        'payment_id' => $payment->id,
+                        'bill_code' => $billCode,
+                    ]);
+                    
                     return $billCode;
                 }
             }
 
             Log::error('ToyyibPay createBill failed', [
-                'response' => $response->body(),
                 'payment_id' => $payment->id,
+                'status' => $statusCode,
+                'response' => $body,
             ]);
 
             return null;
@@ -88,6 +113,7 @@ class ToyyibPayService
             Log::error('ToyyibPay createBill exception', [
                 'error' => $e->getMessage(),
                 'payment_id' => $payment->id,
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return null;
