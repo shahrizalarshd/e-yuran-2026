@@ -35,7 +35,7 @@ services:
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-}
       # Mail Configuration (Resend API)
       - MAIL_MAILER=${MAIL_MAILER:-resend}
-      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-onboarding@resend.dev}
+      - MAIL_FROM_ADDRESS=${MAIL_FROM_ADDRESS:-noreply@pptt.my}
       - MAIL_FROM_NAME=${MAIL_FROM_NAME:-e-Yuran PPTT}
       - RESEND_API_KEY=${RESEND_API_KEY}
     volumes:
