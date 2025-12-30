@@ -121,6 +121,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('bills.generate.yearly')
             ->middleware('role:super_admin');
         Route::get('/bills/outstanding', [AdminBillController::class, 'outstanding'])->name('bills.outstanding');
+        Route::get('/bills/reminders', [AdminBillController::class, 'reminders'])
+            ->name('bills.reminders')
+            ->middleware('role:super_admin,treasurer');
+        Route::post('/bills/send-reminders', [AdminBillController::class, 'sendReminders'])
+            ->name('bills.send-reminders')
+            ->middleware('role:super_admin,treasurer');
+        Route::post('/bills/send-reminder/{house}', [AdminBillController::class, 'sendReminderToHouse'])
+            ->name('bills.send-reminder-house')
+            ->middleware('role:super_admin,treasurer');
         Route::get('/bills/{bill}', [AdminBillController::class, 'show'])->name('bills.show');
         Route::get('/bills/{bill}/edit', [AdminBillController::class, 'edit'])
             ->name('bills.edit')

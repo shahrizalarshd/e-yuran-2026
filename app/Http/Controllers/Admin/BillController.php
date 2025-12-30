@@ -5,9 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Bill;
 use App\Models\House;
+use App\Models\User;
 use App\Models\AuditLog;
 use App\Services\BillingService;
+use App\Mail\BillPaymentReminder;
+use App\Mail\BillOverdueReminder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Artisan;
 
 class BillController extends Controller
 {
@@ -157,7 +162,175 @@ class BillController extends Controller
             })
             ->sortByDesc('total_outstanding');
 
-        return view('admin.bills.outstanding', compact('houses'));
+        // Count for reminder button
+        $overdueCount = Bill::overdue()->count();
+        $unpaidCount = Bill::whereIn('status', ['unpaid', 'partial'])->count();
+
+        return view('admin.bills.outstanding', compact('houses', 'overdueCount', 'unpaidCount'));
+    }
+
+    /**
+     * Show the reminders page
+     */
+    public function reminders()
+    {
+        $overdueHouses = House::billable()
+            ->whereHas('bills', function ($query) {
+                $query->overdue();
+            })
+            ->withCount(['bills' => function ($query) {
+                $query->overdue();
+            }])
+            ->get();
+
+        $unpaidHouses = House::billable()
+            ->whereHas('bills', function ($query) {
+                $query->whereIn('status', ['unpaid', 'partial'])
+                    ->where('due_date', '>=', now());
+            })
+            ->withCount(['bills' => function ($query) {
+                $query->whereIn('status', ['unpaid', 'partial'])
+                    ->where('due_date', '>=', now());
+            }])
+            ->get();
+
+        $overdueCount = Bill::overdue()->count();
+        $unpaidCount = Bill::whereIn('status', ['unpaid', 'partial'])
+            ->where('due_date', '>=', now())
+            ->count();
+
+        $totalOverdueAmount = Bill::overdue()
+            ->selectRaw('SUM(amount - paid_amount) as total')
+            ->value('total') ?? 0;
+
+        $totalUnpaidAmount = Bill::whereIn('status', ['unpaid', 'partial'])
+            ->where('due_date', '>=', now())
+            ->selectRaw('SUM(amount - paid_amount) as total')
+            ->value('total') ?? 0;
+
+        return view('admin.bills.reminders', compact(
+            'overdueHouses',
+            'unpaidHouses',
+            'overdueCount',
+            'unpaidCount',
+            'totalOverdueAmount',
+            'totalUnpaidAmount'
+        ));
+    }
+
+    /**
+     * Send bill reminders
+     */
+    public function sendReminders(Request $request)
+    {
+        $validated = $request->validate([
+            'type' => 'required|in:all,unpaid,overdue',
+        ]);
+
+        $type = $validated['type'];
+
+        // Run the command
+        Artisan::call('bills:send-reminders', [
+            '--type' => $type,
+        ]);
+
+        $output = Artisan::output();
+
+        // Parse the output to get counts
+        preg_match('/Peringatan Bil Belum Bayar\s*:\s*(\d+)/', $output, $unpaidMatch);
+        preg_match('/Peringatan Bil Tertunggak\s*:\s*(\d+)/', $output, $overdueMatch);
+
+        $unpaidSent = $unpaidMatch[1] ?? 0;
+        $overdueSent = $overdueMatch[1] ?? 0;
+        $totalSent = $unpaidSent + $overdueSent;
+
+        if ($totalSent > 0) {
+            $message = "Berjaya menghantar {$totalSent} peringatan email";
+            if ($unpaidSent > 0) {
+                $message .= " ({$unpaidSent} bil belum bayar";
+            }
+            if ($overdueSent > 0) {
+                $message .= $unpaidSent > 0 ? ", " : " (";
+                $message .= "{$overdueSent} bil tertunggak";
+            }
+            $message .= ")";
+
+            return back()->with('success', $message);
+        }
+
+        return back()->with('info', 'Tiada peringatan yang perlu dihantar. Semua rumah sama ada tiada bil tertunggak atau tiada alamat email.');
+    }
+
+    /**
+     * Send reminder to a specific house
+     */
+    public function sendReminderToHouse(House $house)
+    {
+        // Get user for this house
+        $occupancy = $house->activeMemberOccupancy();
+        
+        if (!$occupancy || !$occupancy->resident_id) {
+            return back()->with('error', 'Tiada ahli aktif untuk rumah ini.');
+        }
+
+        $user = User::where('resident_id', $occupancy->resident_id)->first();
+        
+        if (!$user || !$user->email) {
+            return back()->with('error', 'Tiada alamat email untuk penghuni rumah ini.');
+        }
+
+        $unpaidBills = $house->bills()
+            ->whereIn('status', ['unpaid', 'partial'])
+            ->orderBy('bill_year')
+            ->orderBy('bill_month')
+            ->get();
+
+        if ($unpaidBills->isEmpty()) {
+            return back()->with('info', 'Tiada bil tertunggak untuk rumah ini.');
+        }
+
+        $overdueBills = $unpaidBills->filter(fn($bill) => $bill->is_overdue);
+        $regularUnpaidBills = $unpaidBills->filter(fn($bill) => !$bill->is_overdue);
+
+        try {
+            if ($overdueBills->count() > 0) {
+                $totalOverdue = $overdueBills->sum('outstanding_amount');
+                $oldestOverdueDays = (int) now()->diffInDays($overdueBills->min('due_date'));
+
+                Mail::to($user->email)->queue(new BillOverdueReminder(
+                    $user,
+                    $house,
+                    $overdueBills,
+                    $totalOverdue,
+                    $oldestOverdueDays
+                ));
+
+                AuditLog::logAction(
+                    'send_single_reminder',
+                    "Sent overdue reminder to {$user->email} for house {$house->house_no}"
+                );
+
+                return back()->with('success', "Peringatan bil tertunggak telah dihantar ke {$user->email}");
+            } else {
+                $totalOutstanding = $regularUnpaidBills->sum('outstanding_amount');
+
+                Mail::to($user->email)->queue(new BillPaymentReminder(
+                    $user,
+                    $house,
+                    $regularUnpaidBills,
+                    $totalOutstanding
+                ));
+
+                AuditLog::logAction(
+                    'send_single_reminder',
+                    "Sent payment reminder to {$user->email} for house {$house->house_no}"
+                );
+
+                return back()->with('success', "Peringatan yuran telah dihantar ke {$user->email}");
+            }
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal menghantar email: ' . $e->getMessage());
+        }
     }
 }
 

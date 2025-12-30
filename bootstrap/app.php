@@ -32,6 +32,22 @@ return Application::configure(basePath: dirname(__DIR__))
             ->withoutOverlapping()
             ->onOneServer()
             ->appendOutputTo(storage_path('logs/yearly-bills.log'));
+
+        // Send bill payment reminders on 1st of every month at 9:00 AM
+        // Reminder for unpaid bills (not yet overdue)
+        $schedule->command('bills:send-reminders --type=unpaid')
+            ->monthlyOn(1, '09:00')
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->appendOutputTo(storage_path('logs/bill-reminders.log'));
+
+        // Send overdue bill reminders on 15th of every month at 9:00 AM
+        // For bills that are past due date
+        $schedule->command('bills:send-reminders --type=overdue')
+            ->monthlyOn(15, '09:00')
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->appendOutputTo(storage_path('logs/bill-reminders.log'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->report(function (Throwable $e) {

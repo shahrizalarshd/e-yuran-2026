@@ -9,9 +9,19 @@
                     <h2 class="text-lg font-semibold text-gray-900">{{ __('messages.outstanding_report') }}</h2>
                     <p class="text-sm text-gray-500">{{ __('messages.houses') }}: {{ $houses->count() }}</p>
                 </div>
-                <div class="text-right">
-                    <p class="text-sm text-gray-500">{{ __('messages.total_outstanding') }}</p>
-                    <p class="text-2xl font-bold text-red-600">RM {{ number_format($houses->sum('total_outstanding'), 2) }}</p>
+                <div class="flex items-center gap-4">
+                    @if($houses->isNotEmpty() && auth()->user()->hasRole(['super_admin', 'treasurer']))
+                    <a href="{{ route('admin.bills.reminders') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                        </svg>
+                        Hantar Peringatan
+                    </a>
+                    @endif
+                    <div class="text-right">
+                        <p class="text-sm text-gray-500">{{ __('messages.total_outstanding') }}</p>
+                        <p class="text-2xl font-bold text-red-600">RM {{ number_format($houses->sum('total_outstanding'), 2) }}</p>
+                    </div>
                 </div>
             </div>
         </div>
