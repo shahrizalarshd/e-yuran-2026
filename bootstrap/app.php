@@ -16,6 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Trust all proxies (for nginx reverse proxy)
+        // This is essential for signed URL verification to work correctly
+        $middleware->trustProxies(at: '*');
+
         $middleware->web(append: [
             SetLocale::class,
         ]);
