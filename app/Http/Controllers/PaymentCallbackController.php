@@ -11,9 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 class PaymentCallbackController extends Controller
 {
-    public function __construct(private ToyyibPayService $toyyibPayService)
-    {
-    }
+    public function __construct(private ToyyibPayService $toyyibPayService) {}
 
     /**
      * Handle return URL from ToyyibPay (user redirected back)
@@ -23,7 +21,7 @@ class PaymentCallbackController extends Controller
         Log::info('ToyyibPay callback received', $request->all());
 
         $data = $request->all();
-        
+
         // Find the payment
         $payment = Payment::where('payment_no', $data['order_id'] ?? '')
             ->orWhere('toyyibpay_billcode', $data['billcode'] ?? '')
@@ -125,4 +123,3 @@ class PaymentCallbackController extends Controller
         return response('OK', 200);
     }
 }
-
