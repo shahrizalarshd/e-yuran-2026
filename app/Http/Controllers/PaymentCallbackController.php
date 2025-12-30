@@ -31,8 +31,11 @@ class PaymentCallbackController extends Controller
 
         if (!$payment) {
             Log::warning('Payment not found for callback', $data);
-            return redirect()->route('resident.dashboard')
-                ->with('error', __('messages.payment_failed'));
+            return view('payments.result', [
+                'success' => false,
+                'message' => __('messages.payment_failed'),
+                'payment' => null,
+            ]);
         }
 
         // Process based on status
@@ -60,8 +63,12 @@ class PaymentCallbackController extends Controller
                 }
             }
 
-            return redirect()->route('resident.payments.show', $payment)
-                ->with('success', __('messages.payment_success'));
+            // Show payment result page (no auth required) instead of redirecting to protected route
+            return view('payments.result', [
+                'success' => true,
+                'message' => __('messages.payment_success'),
+                'payment' => $payment,
+            ]);
         } elseif ($status === '3') {
             // Payment failed
             if ($payment->status === 'pending') {
@@ -70,12 +77,18 @@ class PaymentCallbackController extends Controller
                 AuditLog::logAction('payment_failed', "Payment {$payment->payment_no} failed");
             }
 
-            return redirect()->route('resident.dashboard')
-                ->with('error', __('messages.payment_failed'));
+            return view('payments.result', [
+                'success' => false,
+                'message' => __('messages.payment_failed'),
+                'payment' => $payment,
+            ]);
         } else {
             // Payment pending or cancelled
-            return redirect()->route('resident.dashboard')
-                ->with('warning', __('Pembayaran masih dalam proses atau dibatalkan.'));
+            return view('payments.result', [
+                'success' => null,
+                'message' => __('Pembayaran masih dalam proses atau dibatalkan.'),
+                'payment' => $payment,
+            ]);
         }
     }
 
