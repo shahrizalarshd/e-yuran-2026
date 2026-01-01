@@ -30,6 +30,10 @@ return [
     'date' => 'Tarikh',
     'amount' => 'Jumlah',
     'total' => 'Jumlah',
+    'current' => 'Semasa',
+    'danger_zone' => 'Zon Bahaya',
+    'delete_bill_warning' => 'Tindakan ini tidak boleh dibatalkan. Bil ini akan dipadam secara kekal.',
+    'confirm_delete' => 'Adakah anda pasti mahu memadam?',
     
     // Auth
     'email' => 'Emel',

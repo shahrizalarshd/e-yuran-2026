@@ -30,6 +30,10 @@ return [
     'date' => 'Date',
     'amount' => 'Amount',
     'total' => 'Total',
+    'current' => 'Current',
+    'danger_zone' => 'Danger Zone',
+    'delete_bill_warning' => 'This action cannot be undone. This bill will be permanently deleted.',
+    'confirm_delete' => 'Are you sure you want to delete?',
     
     // Auth
     'email' => 'Email',
