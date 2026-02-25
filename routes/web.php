@@ -52,7 +52,7 @@ Route::get('/language/{locale}', [LanguageController::class, 'switch'])->name('l
 
 // Payment callbacks (no auth required - ToyyibPay redirects here)
 Route::get('/payment/callback', [PaymentCallbackController::class, 'callback'])->name('payment.callback');
-Route::post('/payment/webhook', [PaymentCallbackController::class, 'webhook'])->name('payment.webhook');
+Route::post('/payment/webhook', [PaymentCallbackController::class, 'webhook'])->middleware('throttle:60,1')->name('payment.webhook');
 
 // Authenticated routes
 Route::middleware(['auth', 'verified'])->group(function () {

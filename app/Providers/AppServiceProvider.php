@@ -2,8 +2,6 @@
 
 namespace App\Providers;
 
-use App\Models\House;
-use App\Observers\HouseObserver;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -26,8 +24,6 @@ class AppServiceProvider extends ServiceProvider
         if (config('app.env') === 'production') {
             URL::forceScheme('https');
         }
-
-        // Register House observer for auto-generating bills
-        House::observe(HouseObserver::class);
     }
 }
+

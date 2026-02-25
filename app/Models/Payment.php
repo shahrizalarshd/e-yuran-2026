@@ -122,9 +122,18 @@ class Payment extends Model
             'paid_at' => now(),
         ]);
 
-        // Mark all associated bills as paid
+        // Find payer occupancy for audit trail (MODEL HIBRID)
+        $payerOccupancy = null;
+        if ($this->house_id && $this->resident_id) {
+            $payerOccupancy = HouseOccupancy::where('house_id', $this->house_id)
+                ->where('resident_id', $this->resident_id)
+                ->whereNull('end_date')
+                ->first();
+        }
+
+        // Mark all associated bills as paid with audit trail
         foreach ($this->bills as $bill) {
-            $bill->markAsPaid();
+            $bill->markAsPaid($payerOccupancy);
         }
     }
 
