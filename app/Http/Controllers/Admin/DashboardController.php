@@ -25,7 +25,7 @@ class DashboardController extends Controller
         $recentPayments = Payment::with(['house', 'resident'])
             ->where('status', 'success')
             ->orderBy('paid_at', 'desc')
-            ->limit(10)
+            ->limit(5)
             ->get();
 
         $pendingVerifications = HouseMember::with(['house', 'resident'])
@@ -119,24 +119,7 @@ class DashboardController extends Controller
             ->pluck('count', 'status')
             ->toArray();
 
-        // Chart Data: Weekly Collection (last 7 days) - Optimized single query
-        $startDate = now()->subDays(6)->startOfDay();
-        $endDate = now()->endOfDay();
-        
-        $weeklyData = Payment::where('status', 'success')
-            ->whereBetween('paid_at', [$startDate, $endDate])
-            ->selectRaw("DATE(paid_at) as date, SUM(amount) as total")
-            ->groupBy('date')
-            ->pluck('total', 'date')
-            ->toArray();
-        
-        $weeklyCollection = [];
-        $weeklyLabels = [];
-        for ($i = 6; $i >= 0; $i--) {
-            $date = now()->subDays($i);
-            $weeklyLabels[] = $date->translatedFormat('D');
-            $weeklyCollection[] = $weeklyData[$date->toDateString()] ?? 0;
-        }
+
 
         // Collection rate for selected year (percentage of paid bills)
         $totalBills = Bill::where('bill_year', $currentYear)->count();
@@ -158,6 +141,30 @@ class DashboardController extends Controller
 
         $allTimeCollection = array_sum($yearlyBreakdown);
 
+        // Yearly outstanding: sum of outstanding_amount for unpaid/partial bills per year
+        $yearlyOutstanding = Bill::whereIn('status', ['unpaid', 'partial'])
+            ->selectRaw('bill_year, SUM(amount - paid_amount) as total')
+            ->groupBy('bill_year')
+            ->orderBy('bill_year')
+            ->pluck('total', 'bill_year')
+            ->toArray();
+
+        // Merge years from both datasets so the chart covers all years
+        $allYears = collect(array_keys($yearlyBreakdown))
+            ->merge(array_keys($yearlyOutstanding))
+            ->unique()
+            ->sort()
+            ->values()
+            ->toArray();
+
+        // Align both arrays to the same set of years
+        $yearlyBreakdownAligned = [];
+        $yearlyOutstandingAligned = [];
+        foreach ($allYears as $y) {
+            $yearlyBreakdownAligned[$y] = $yearlyBreakdown[$y] ?? 0;
+            $yearlyOutstandingAligned[$y] = $yearlyOutstanding[$y] ?? 0;
+        }
+
         return view('admin.dashboard', compact(
             'stats',
             'recentPayments',
@@ -166,8 +173,6 @@ class DashboardController extends Controller
             'chartMonthlyData',
             'chartLastYearData',
             'billStatusData',
-            'weeklyCollection',
-            'weeklyLabels',
             'collectionRate',
             'currentYear',
             'lastYear',
@@ -176,6 +181,9 @@ class DashboardController extends Controller
             'compareYear',
             'yearlyTotal',
             'yearlyBreakdown',
+            'yearlyBreakdownAligned',
+            'yearlyOutstandingAligned',
+            'allYears',
             'allTimeCollection'
         ));
     }

@@ -137,7 +137,8 @@
                     @endif
                 </div>
 
-                @foreach($unpaidBills->groupBy('bill_year')->sortKeysDesc() as $year => $yearBills)
+                @php $yearGroups = $unpaidBills->groupBy('bill_year')->sortKeysDesc(); $shownYears = $yearGroups->take(3); $hiddenYearsCount = $yearGroups->count() - 3; @endphp
+                @foreach($shownYears as $year => $yearBills)
                     <!-- Year Group Header -->
                     <button type="button" @click="toggle({{ $year }})" class="w-full p-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between hover:bg-gray-100 transition">
                         <div class="flex items-center gap-2">
@@ -182,6 +183,12 @@
                         @endforeach
                     </div>
                 @endforeach
+
+                @if($hiddenYearsCount > 0)
+                    <a href="{{ route('resident.bills.index', ['status' => 'unpaid']) }}" class="block p-3 text-center text-sm font-medium text-primary-600 hover:bg-gray-50 transition border-t border-gray-100">
+                        {{ __('Lihat') }} {{ $hiddenYearsCount }} {{ __('tahun lagi') }} →
+                    </a>
+                @endif
             </div>
         @else
             <div class="bg-white rounded-xl shadow-sm p-8 text-center">
@@ -260,33 +267,6 @@
             </div>
         </div>
 
-        <!-- Paid Bills -->
-        @if($paidBills->count() > 0)
-            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                <div class="p-4 border-b border-gray-100 flex items-center justify-between">
-                    <h2 class="font-semibold text-gray-900">{{ __('messages.paid') }}</h2>
-                    <a href="{{ route('resident.bills.index', ['status' => 'paid']) }}" class="text-sm text-primary-600 font-medium">{{ __('Lihat Semua') }}</a>
-                </div>
-                <div class="divide-y divide-gray-100">
-                    @foreach($paidBills->take(5) as $bill)
-                        <div class="p-4 flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                                    <span class="text-green-600 font-semibold text-sm">{{ $bill->bill_month }}</span>
-                                </div>
-                                <div>
-                                    <p class="font-medium text-gray-900">{{ $bill->bill_period }}</p>
-                                    <p class="text-sm text-gray-500">{{ __('messages.paid_at') }}: {{ $bill->paid_at->format('d/m/Y') }}</p>
-                                </div>
-                            </div>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                {{ __('messages.paid') }}
-                            </span>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        @endif
     </div>
 
     @push('scripts')

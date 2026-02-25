@@ -102,18 +102,11 @@
 
         <!-- Analytics Charts Section -->
         @if(auth()->user()->isSuperAdmin() || auth()->user()->isTreasurer())
-        <!-- Analytics Header with Filter -->
-        <div class="bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl p-4 lg:p-6 shadow-sm">
-            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div class="bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl p-4 lg:p-5 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div class="text-white">
                     <h2 class="text-lg font-semibold">{{ __('Analitik Kewangan') }}</h2>
-                    <p class="text-primary-100 text-sm mt-1">{{ __('Jumlah Kutipan') }} {{ $currentYear }}: <span class="font-bold text-white">RM {{ number_format($yearlyTotal, 2) }}</span></p>
-
-                    {{-- All-time cumulative collection --}}
-                    <div class="mt-3 pt-3 border-t border-white/20">
-                        <p class="text-primary-100 text-xs uppercase tracking-wider font-medium">{{ __('Kutipan Keseluruhan (Semua Tahun)') }}</p>
-                        <p class="text-2xl lg:text-3xl font-bold text-white mt-1">RM {{ number_format($allTimeCollection, 2) }}</p>
-                    </div>
+                    <p class="text-primary-100 text-sm mt-1">{{ __('Kutipan') }} {{ $currentYear }}: <span class="font-bold text-white">RM {{ number_format($yearlyTotal, 2) }}</span></p>
                 </div>
                 <form action="{{ route('admin.dashboard') }}" method="GET" class="flex flex-wrap items-center gap-2 sm:gap-3 shrink-0">
                     <div class="flex items-center gap-2">
@@ -142,8 +135,22 @@
         @if(count($yearlyBreakdown) > 0)
         <div class="bg-white rounded-xl shadow-sm overflow-hidden">
             <div class="p-3 sm:p-4 border-b border-gray-100">
-                <h2 class="font-semibold text-gray-900 text-sm sm:text-base">{{ __('Kutipan Mengikut Tahun') }}</h2>
-                <p class="text-xs sm:text-sm text-gray-500">{{ __('Jumlah kutipan dari tahun-tahun sebelum hingga semasa') }}</p>
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div>
+                        <h2 class="font-semibold text-gray-900 text-sm sm:text-base">{{ __('Kutipan Mengikut Tahun') }}</h2>
+                        <p class="text-xs sm:text-sm text-gray-500">{{ __('Jumlah kutipan dan tertunggak setiap tahun') }}</p>
+                    </div>
+                    <div class="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm">
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500"></div>
+                            <span class="text-gray-600">{{ __('Kutipan') }}</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500"></div>
+                            <span class="text-gray-600">{{ __('Tertunggak') }}</span>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="p-3 sm:p-4">
                 <div class="relative h-[200px] sm:h-[250px]">
@@ -181,69 +188,43 @@
                 </div>
             </div>
 
-            <!-- Collection Rate & Bill Status -->
-            <div class="grid grid-cols-2 lg:grid-cols-1 gap-4 lg:gap-6">
-                <!-- Collection Rate -->
-                <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
-                    <div class="flex items-center justify-between mb-3 sm:mb-4">
-                        <h3 class="font-semibold text-gray-900 text-sm sm:text-base">{{ __('Kadar Kutipan') }}</h3>
-                        <span class="text-xs bg-primary-100 text-primary-700 px-2 py-0.5 sm:py-1 rounded-full font-medium">{{ $currentYear }}</span>
-                    </div>
-                    <div class="flex items-center justify-center">
-                        <div class="relative w-24 h-24 sm:w-32 sm:h-32">
-                            <canvas id="collectionRateChart"></canvas>
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <span class="text-lg sm:text-2xl font-bold text-gray-900">{{ $collectionRate }}%</span>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-center text-xs sm:text-sm text-gray-500 mt-3 sm:mt-4">{{ __('Bil yang telah dibayar') }}</p>
+            <!-- Combined: Status Bil & Kadar Kutipan -->
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+                <div class="flex items-center justify-between mb-3 sm:mb-4">
+                    <h3 class="font-semibold text-gray-900 text-sm sm:text-base">{{ __('Status Bil') }}</h3>
+                    <span class="text-xs bg-primary-100 text-primary-700 px-2 py-0.5 sm:py-1 rounded-full font-medium">{{ $currentYear }}</span>
                 </div>
-
-                <!-- Bill Status Distribution -->
-                <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
-                    <div class="flex items-center justify-between mb-3 sm:mb-4">
-                        <h3 class="font-semibold text-gray-900 text-sm sm:text-base">{{ __('Status Bil') }}</h3>
-                        <span class="text-xs bg-primary-100 text-primary-700 px-2 py-0.5 sm:py-1 rounded-full font-medium">{{ $currentYear }}</span>
-                    </div>
-                    <div class="relative h-[100px] sm:h-[130px]">
+                <div class="flex items-center justify-center">
+                    <div class="relative w-24 h-24 sm:w-28 sm:h-28">
                         <canvas id="billStatusChart"></canvas>
-                    </div>
-                    <div class="mt-3 sm:mt-4 space-y-1.5 sm:space-y-2">
-                        <div class="flex items-center justify-between text-xs sm:text-sm">
-                            <div class="flex items-center gap-1.5 sm:gap-2">
-                                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500"></div>
-                                <span class="text-gray-600">{{ __('messages.paid') }}</span>
-                            </div>
-                            <span class="font-medium text-gray-900">{{ $billStatusData['paid'] ?? 0 }}</span>
-                        </div>
-                        <div class="flex items-center justify-between text-xs sm:text-sm">
-                            <div class="flex items-center gap-1.5 sm:gap-2">
-                                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500"></div>
-                                <span class="text-gray-600">{{ __('messages.unpaid') }}</span>
-                            </div>
-                            <span class="font-medium text-gray-900">{{ $billStatusData['unpaid'] ?? 0 }}</span>
-                        </div>
-                        <div class="flex items-center justify-between text-xs sm:text-sm">
-                            <div class="flex items-center gap-1.5 sm:gap-2">
-                                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-500"></div>
-                                <span class="text-gray-600">{{ __('messages.partial') }}</span>
-                            </div>
-                            <span class="font-medium text-gray-900">{{ $billStatusData['partial'] ?? 0 }}</span>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-lg sm:text-xl font-bold text-gray-900">{{ $collectionRate }}%</span>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Weekly Collection Chart -->
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div class="p-3 sm:p-4 border-b border-gray-100">
-                <h2 class="font-semibold text-gray-900 text-sm sm:text-base">{{ __('Kutipan 7 Hari Terakhir') }}</h2>
-            </div>
-            <div class="p-3 sm:p-4">
-                <div class="relative h-[120px] sm:h-[150px]">
-                    <canvas id="weeklyCollectionChart"></canvas>
+                <p class="text-center text-xs text-gray-400 mt-2">{{ __('Kadar Kutipan') }}</p>
+                <div class="mt-3 sm:mt-4 space-y-1.5 sm:space-y-2">
+                    <div class="flex items-center justify-between text-xs sm:text-sm">
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500"></div>
+                            <span class="text-gray-600">{{ __('messages.paid') }}</span>
+                        </div>
+                        <span class="font-medium text-gray-900">{{ $billStatusData['paid'] ?? 0 }}</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs sm:text-sm">
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500"></div>
+                            <span class="text-gray-600">{{ __('messages.unpaid') }}</span>
+                        </div>
+                        <span class="font-medium text-gray-900">{{ $billStatusData['unpaid'] ?? 0 }}</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs sm:text-sm">
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-500"></div>
+                            <span class="text-gray-600">{{ __('messages.partial') }}</span>
+                        </div>
+                        <span class="font-medium text-gray-900">{{ $billStatusData['partial'] ?? 0 }}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -456,31 +437,8 @@
                 });
             }
 
-            // Collection Rate Donut Chart
-            const rateCtx = document.getElementById('collectionRateChart');
-            if (rateCtx) {
-                new Chart(rateCtx, {
-                    type: 'doughnut',
-                    data: {
-                        datasets: [{
-                            data: [{{ $collectionRate }}, {{ 100 - $collectionRate }}],
-                            backgroundColor: ['rgb(22, 163, 74)', 'rgb(229, 231, 235)'],
-                            borderWidth: 0,
-                            cutout: '75%'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: { enabled: false }
-                        }
-                    }
-                });
-            }
 
-            // Bill Status Chart
+            // Bill Status Chart (combined with collection rate)
             const statusCtx = document.getElementById('billStatusChart');
             if (statusCtx) {
                 new Chart(statusCtx, {
@@ -498,97 +456,53 @@
                                 'rgb(239, 68, 68)',
                                 'rgb(234, 179, 8)'
                             ],
-                            borderWidth: 0
+                            borderWidth: 0,
+                            cutout: '65%'
                         }]
                     },
                     options: {
                         responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false }
-                        }
-                    }
-                });
-            }
-
-            // Weekly Collection Bar Chart
-            const weeklyCtx = document.getElementById('weeklyCollectionChart');
-            if (weeklyCtx) {
-                new Chart(weeklyCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: @json($weeklyLabels),
-                        datasets: [{
-                            label: '{{ __("messages.total_collection") }}',
-                            data: @json($weeklyCollection),
-                            backgroundColor: 'rgba(22, 163, 74, 0.8)',
-                            borderRadius: isMobile ? 4 : 6,
-                            barThickness: isMobile ? 'flex' : 40,
-                            maxBarThickness: isMobile ? 30 : 50
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
+                        maintainAspectRatio: true,
                         plugins: {
                             legend: { display: false },
-                            tooltip: {
-                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                                padding: isMobile ? 8 : 12,
-                                titleFont: { size: isMobile ? 11 : 14 },
-                                bodyFont: { size: isMobile ? 10 : 13 },
-                                callbacks: {
-                                    label: function(context) {
-                                        return 'RM ' + context.parsed.y.toLocaleString('en-MY', {minimumFractionDigits: 2});
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                grid: { display: false },
-                                ticks: {
-                                    font: { size: isMobile ? 10 : 12 }
-                                }
-                            },
-                            y: {
-                                beginAtZero: true,
-                                grid: { color: 'rgba(0,0,0,0.05)' },
-                                ticks: {
-                                    font: { size: isMobile ? 9 : 11 },
-                                    maxTicksLimit: isMobile ? 5 : 8,
-                                    callback: function(value) {
-                                        if (isMobile && value >= 1000) {
-                                            return 'RM ' + (value / 1000).toFixed(0) + 'k';
-                                        }
-                                        return 'RM ' + value.toLocaleString();
-                                    }
-                                }
-                            }
+                            tooltip: { enabled: false }
                         }
                     }
                 });
             }
 
-            // Yearly Collection Bar Chart
+
+            // Yearly Collection Stacked Bar Chart
             const yearlyCtx = document.getElementById('yearlyCollectionChart');
             if (yearlyCtx) {
-                const yearlyData = @json($yearlyBreakdown);
-                const yearLabels = Object.keys(yearlyData);
-                const yearValues = Object.values(yearlyData).map(v => parseFloat(v));
+                const yearLabels = @json($allYears).map(String);
+                const kutipanValues = Object.values(@json($yearlyBreakdownAligned)).map(v => parseFloat(v));
+                const tertunggakValues = Object.values(@json($yearlyOutstandingAligned)).map(v => parseFloat(v));
 
                 new Chart(yearlyCtx, {
                     type: 'bar',
                     data: {
                         labels: yearLabels,
-                        datasets: [{
-                            label: '{{ __("Kutipan") }}',
-                            data: yearValues,
-                            backgroundColor: yearLabels.map((y) => y == {{ $currentYear }} ? 'rgba(22, 163, 74, 1)' : 'rgba(22, 163, 74, 0.6)'),
-                            borderRadius: isMobile ? 4 : 6,
-                            barThickness: isMobile ? 'flex' : undefined,
-                            maxBarThickness: isMobile ? 30 : 60
-                        }]
+                        datasets: [
+                            {
+                                label: '{{ __("Kutipan") }}',
+                                data: kutipanValues,
+                                backgroundColor: 'rgba(22, 163, 74, 0.85)',
+                                hoverBackgroundColor: 'rgba(22, 163, 74, 1)',
+                                borderRadius: { topLeft: 0, topRight: 0, bottomLeft: 4, bottomRight: 4 },
+                                barThickness: isMobile ? 'flex' : undefined,
+                                maxBarThickness: isMobile ? 30 : 60
+                            },
+                            {
+                                label: '{{ __("Tertunggak") }}',
+                                data: tertunggakValues,
+                                backgroundColor: 'rgba(239, 68, 68, 0.75)',
+                                hoverBackgroundColor: 'rgba(239, 68, 68, 1)',
+                                borderRadius: { topLeft: 4, topRight: 4, bottomLeft: 0, bottomRight: 0 },
+                                barThickness: isMobile ? 'flex' : undefined,
+                                maxBarThickness: isMobile ? 30 : 60
+                            }
+                        ]
                     },
                     options: {
                         responsive: true,
@@ -596,23 +510,31 @@
                         plugins: {
                             legend: { display: false },
                             tooltip: {
-                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                backgroundColor: 'rgba(0, 0, 0, 0.85)',
                                 padding: isMobile ? 8 : 12,
                                 titleFont: { size: isMobile ? 11 : 14 },
                                 bodyFont: { size: isMobile ? 10 : 13 },
                                 callbacks: {
                                     label: function(context) {
-                                        return 'RM ' + context.parsed.y.toLocaleString('en-MY', {minimumFractionDigits: 2});
+                                        const fmt = v => 'RM ' + v.toLocaleString('en-MY', {minimumFractionDigits: 2});
+                                        return context.dataset.label + ': ' + fmt(context.parsed.y);
+                                    },
+                                    afterBody: function(contexts) {
+                                        const idx = contexts[0].dataIndex;
+                                        const total = kutipanValues[idx] + tertunggakValues[idx];
+                                        return '─────────────\nJumlah Bil: RM ' + total.toLocaleString('en-MY', {minimumFractionDigits: 2});
                                     }
                                 }
                             }
                         },
                         scales: {
                             x: {
+                                stacked: true,
                                 grid: { display: false },
                                 ticks: { font: { size: isMobile ? 10 : 12 } }
                             },
                             y: {
+                                stacked: true,
                                 beginAtZero: true,
                                 grid: { color: 'rgba(0,0,0,0.05)' },
                                 ticks: {

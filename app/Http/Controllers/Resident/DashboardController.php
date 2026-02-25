@@ -49,12 +49,7 @@ class DashboardController extends Controller
             ->orderBy('bill_month')
             ->get();
 
-        $paidBills = Bill::where('house_id', $house->id)
-            ->where('status', 'paid')
-            ->orderBy('bill_year', 'desc')
-            ->orderBy('bill_month', 'desc')
-            ->limit(12)
-            ->get();
+
 
         $outstandingAmount = $unpaidBills->sum(fn($bill) => $bill->outstanding_amount);
 
@@ -102,7 +97,6 @@ class DashboardController extends Controller
             'house',
             'memberships',
             'unpaidBills',
-            'paidBills',
             'outstandingAmount',
             'recentPayments',
             'primaryMembership',
