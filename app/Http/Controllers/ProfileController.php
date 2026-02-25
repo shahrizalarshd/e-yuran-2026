@@ -48,6 +48,16 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
+        // Block deletion if user has outstanding bills
+        if ($user->resident && $user->resident->currentOccupancy()) {
+            $house = $user->resident->currentOccupancy()->house;
+            if ($house && $house->outstanding_amount > 0) {
+                return back()->withErrors([
+                    'outstanding' => __('messages.delete_account_warning'),
+                ], 'userDeletion');
+            }
+        }
+
         Auth::logout();
 
         $user->delete();

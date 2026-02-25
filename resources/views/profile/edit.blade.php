@@ -229,6 +229,9 @@
                             @error('password', 'userDeletion')
                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                             @enderror
+                            @error('outstanding', 'userDeletion')
+                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div class="flex gap-3 pt-2">
