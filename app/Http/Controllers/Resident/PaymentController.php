@@ -272,6 +272,29 @@ class PaymentController extends Controller
         return view('resident.payments.show', compact('payment'));
     }
 
+    public function printReceipt(Payment $payment)
+    {
+        $resident = auth()->user()->resident;
+
+        if (!$resident) {
+            abort(403, __('Sila lengkapkan profil penduduk anda terlebih dahulu.'));
+        }
+
+        // Verify access
+        $membership = $resident->houseMemberships()
+            ->where('house_id', $payment->house_id)
+            ->where('status', 'active')
+            ->first();
+
+        if (!$membership) {
+            abort(403);
+        }
+
+        $payment->load(['house', 'bills', 'resident']);
+
+        return view('resident.payments.print-receipt', compact('payment'));
+    }
+
     private function getSelectedHouse($resident): ?House
     {
         if (!$resident) {

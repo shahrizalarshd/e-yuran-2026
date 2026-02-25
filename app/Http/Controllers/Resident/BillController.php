@@ -55,7 +55,14 @@ class BillController extends Controller
             ->orderBy('bill_year', 'desc')
             ->pluck('bill_year');
 
-        return view('resident.bills.index', compact('bills', 'house', 'years'));
+        // Summary stats (always from all bills, not filtered)
+        $allBills = Bill::where('house_id', $house->id);
+        $unpaidCount = (clone $allBills)->whereIn('status', ['unpaid', 'partial'])->count();
+        $unpaidAmount = (clone $allBills)->whereIn('status', ['unpaid', 'partial'])->sum('amount');
+        $paidCount = (clone $allBills)->where('status', 'paid')->count();
+        $paidAmount = (clone $allBills)->where('status', 'paid')->sum('amount');
+
+        return view('resident.bills.index', compact('bills', 'house', 'years', 'unpaidCount', 'unpaidAmount', 'paidCount', 'paidAmount'));
     }
 
     public function show(Bill $bill)
@@ -79,6 +86,29 @@ class BillController extends Controller
         $bill->load(['house', 'payments']);
 
         return view('resident.bills.show', compact('bill'));
+    }
+
+    public function printBill(Bill $bill)
+    {
+        $resident = auth()->user()->resident;
+
+        if (!$resident) {
+            abort(403, __('Sila lengkapkan profil penduduk anda terlebih dahulu.'));
+        }
+
+        // Verify access
+        $membership = $resident->houseMemberships()
+            ->where('house_id', $bill->house_id)
+            ->where('status', 'active')
+            ->first();
+
+        if (!$membership || !$membership->can_view_bills) {
+            abort(403);
+        }
+
+        $bill->load(['house', 'payments']);
+
+        return view('resident.bills.print-bill', compact('bill'));
     }
 
     private function getSelectedHouse($resident): ?House

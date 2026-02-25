@@ -17,6 +17,28 @@
             </div>
         </div>
 
+        <!-- Summary Strip -->
+        <div class="bg-white rounded-xl shadow-sm p-3 flex gap-3">
+            <div class="flex-1 flex items-center gap-2 px-3 py-2 bg-red-50 rounded-lg">
+                <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                    <span class="text-xs font-bold text-red-600">{{ $unpaidCount }}</span>
+                </div>
+                <div>
+                    <p class="text-xs text-red-600 font-medium">{{ __('Belum Bayar') }}</p>
+                    <p class="text-sm font-bold text-red-700">RM {{ number_format($unpaidAmount, 2) }}</p>
+                </div>
+            </div>
+            <div class="flex-1 flex items-center gap-2 px-3 py-2 bg-green-50 rounded-lg">
+                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <span class="text-xs font-bold text-green-600">{{ $paidCount }}</span>
+                </div>
+                <div>
+                    <p class="text-xs text-green-600 font-medium">{{ __('Sudah Bayar') }}</p>
+                    <p class="text-sm font-bold text-green-700">RM {{ number_format($paidAmount, 2) }}</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Filters -->
         <form method="GET" class="bg-white rounded-xl shadow-sm p-4">
             <div class="flex flex-wrap gap-3">
@@ -57,11 +79,18 @@
                                     </p>
                                 </div>
                             </div>
-                            <div class="text-right">
-                                <p class="font-semibold text-gray-900">RM {{ number_format($bill->amount, 2) }}</p>
-                                <span class="text-xs px-2 py-0.5 rounded-full {{ $bill->status_badge_class }}">
-                                    {{ __('messages.' . $bill->status) }}
-                                </span>
+                            <div class="flex items-center gap-3">
+                                <div class="text-right">
+                                    <p class="font-semibold text-gray-900">RM {{ number_format($bill->amount, 2) }}</p>
+                                    <span class="text-xs px-2 py-0.5 rounded-full {{ $bill->status_badge_class }}">
+                                        {{ __('messages.' . $bill->status) }}
+                                    </span>
+                                </div>
+                                <a href="{{ route('resident.bills.print', $bill) }}" target="_blank" class="w-9 h-9 flex items-center justify-center rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 transition" title="{{ __('Cetak Bil') }}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                                    </svg>
+                                </a>
                             </div>
                         </div>
                     @endforeach

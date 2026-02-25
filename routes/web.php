@@ -207,6 +207,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
         Route::post('/payments', [ResidentPaymentController::class, 'store'])->name('payments.store');
         Route::get('/payments/{payment}', [ResidentPaymentController::class, 'show'])->name('payments.show');
+        Route::get('/payments/{payment}/print', [ResidentPaymentController::class, 'printReceipt'])->name('payments.print');
+
+        // Bills print
+        Route::get('/bills/{bill}/print', [ResidentBillController::class, 'printBill'])->name('bills.print');
 
         // House Settings (Owner only - for setting payer)
         Route::get('/house-settings', [HouseSettingsController::class, 'index'])->name('house-settings.index');
