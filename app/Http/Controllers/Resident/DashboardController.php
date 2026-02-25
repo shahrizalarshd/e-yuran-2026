@@ -72,6 +72,20 @@ class DashboardController extends Controller
         // Chart Data: Payment History (last 12 months)
         $paymentHistoryData = $this->getPaymentHistoryData($house);
 
+        // Yearly progress: how many bills paid this year vs total
+        $currentYearBills = Bill::where('house_id', $house->id)
+            ->where('bill_year', $currentYear)
+            ->get();
+        $yearlyProgress = [
+            'paid' => $currentYearBills->where('status', 'paid')->count(),
+            'total' => $currentYearBills->count(),
+            'percentage' => $currentYearBills->count() > 0 
+                ? round(($currentYearBills->where('status', 'paid')->count() / $currentYearBills->count()) * 100) 
+                : 0,
+            'paidAmount' => $currentYearBills->where('status', 'paid')->sum('amount'),
+            'totalAmount' => $currentYearBills->sum('amount'),
+        ];
+
         // Get membership fees for this resident at this house
         $membershipFees = MembershipFee::where('house_id', $house->id)
             ->where(function ($q) use ($resident) {
@@ -96,7 +110,8 @@ class DashboardController extends Controller
             'paymentHistoryData',
             'currentYear',
             'membershipFees',
-            'unpaidMembershipFee'
+            'unpaidMembershipFee',
+            'yearlyProgress'
         ));
     }
 
