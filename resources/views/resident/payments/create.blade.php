@@ -76,7 +76,7 @@
             <div class="bg-white rounded-xl shadow-sm overflow-hidden mb-4">
                 <div class="p-4 border-b border-gray-100 flex items-center justify-between">
                     <h2 class="font-semibold text-gray-900">{{ __('messages.unpaid') }}</h2>
-                    <button type="button" @click="toggleAll()" class="text-sm text-primary-600 font-medium">
+                    <button type="button" @click="toggleAll()" class="px-4 py-2 text-sm font-semibold rounded-lg transition" :class="allSelected ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-primary-600 text-white hover:bg-primary-700'">
                         <span x-text="allSelected ? '{{ __('Nyahpilih Semua') }}' : '{{ __('Pilih Semua') }}'"></span>
                     </button>
                 </div>
