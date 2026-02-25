@@ -39,7 +39,20 @@ class PaymentController extends Controller
             });
         }
 
-        $payments = $query->orderBy('created_at', 'desc')->paginate(20);
+        // Filter by street
+        if ($request->filled('street')) {
+            $query->whereHas('house', function ($q) use ($request) {
+                $q->where('street_name', $request->street);
+            });
+        }
+
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortDir = $request->get('sort_dir', 'desc');
+        $allowedSorts = ['payment_no', 'amount', 'status', 'created_at'];
+        if (!in_array($sortBy, $allowedSorts)) { $sortBy = 'created_at'; }
+        if (!in_array($sortDir, ['asc', 'desc'])) { $sortDir = 'desc'; }
+
+        $payments = $query->orderBy($sortBy, $sortDir)->paginate(20);
 
         // Stats
         $totalSuccess = Payment::where('status', 'success')->sum('amount');
@@ -48,11 +61,14 @@ class PaymentController extends Controller
             ->whereDate('paid_at', today())
             ->sum('amount');
 
+        $streets = \App\Models\House::distinct()->pluck('street_name')->sort()->values();
+
         return view('admin.payments.index', compact(
             'payments',
             'totalSuccess',
             'totalPending',
-            'todayCollection'
+            'todayCollection',
+            'streets'
         ));
     }
 

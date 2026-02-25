@@ -7,30 +7,40 @@
             <div class="flex flex-wrap gap-3">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('Cari rumah...') }}" class="flex-1 min-w-[200px] rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
                 
-                <select name="status" onchange="this.form.submit()" class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
+                <select name="status" class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
                     <option value="">{{ __('messages.all') }} {{ __('messages.status') }}</option>
                     <option value="unpaid" {{ request('status') === 'unpaid' ? 'selected' : '' }}>{{ __('messages.unpaid') }}</option>
                     <option value="paid" {{ request('status') === 'paid' ? 'selected' : '' }}>{{ __('messages.paid') }}</option>
                     <option value="processing" {{ request('status') === 'processing' ? 'selected' : '' }}>{{ __('messages.processing') }}</option>
                 </select>
                 
-                <select name="year" onchange="this.form.submit()" class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
+                <select name="year" class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
                     <option value="">{{ __('Semua Tahun') }}</option>
                     @foreach($years as $year)
                         <option value="{{ $year }}" {{ request('year') == $year ? 'selected' : '' }}>{{ $year }}</option>
                     @endforeach
                 </select>
 
-                <select name="month" onchange="this.form.submit()" class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
+                <select name="month" class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
                     <option value="">{{ __('Semua Bulan') }}</option>
                     @for($m = 1; $m <= 12; $m++)
                         <option value="{{ $m }}" {{ request('month') == $m ? 'selected' : '' }}>{{ $m }}</option>
                     @endfor
                 </select>
 
+                <select name="street" class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
+                    <option value="">{{ __('Semua Jalan') }}</option>
+                    @foreach($streets as $street)
+                        <option value="{{ $street }}" {{ request('street') === $street ? 'selected' : '' }}>{{ $street }}</option>
+                    @endforeach
+                </select>
+
                 <button type="submit" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition min-h-touch">
                     {{ __('messages.filter') }}
                 </button>
+                <a href="{{ route('admin.bills.index') }}" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition min-h-touch inline-flex items-center">
+                    Set Semula
+                </a>
             </div>
         </form>
 
@@ -40,11 +50,11 @@
                 <table class="w-full">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.bill_no') }}</th>
+                            <x-sort-header column="bill_no" label="{{ __('messages.bill_no') }}" />
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.house') }}</th>
-                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ __('messages.bill_period') }}</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ __('messages.amount') }}</th>
-                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ __('messages.status') }}</th>
+                            <x-sort-header column="bill_year" label="{{ __('messages.bill_period') }}" align="center" />
+                            <x-sort-header column="amount" label="{{ __('messages.amount') }}" align="right" />
+                            <x-sort-header column="status" label="{{ __('messages.status') }}" align="center" />
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ __('messages.actions') }}</th>
                         </tr>
                     </thead>

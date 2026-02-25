@@ -16,14 +16,12 @@
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.search') }}..." class="w-full rounded-lg border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500">
                 </div>
                 <div class="flex gap-2">
-                    <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition min-h-touch">
-                        {{ __('messages.search') }}
+                    <button type="submit" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition min-h-touch">
+                        {{ __('messages.filter') }}
                     </button>
-                    @if(request('search'))
-                        <a href="{{ route('admin.residents.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition min-h-touch">
-                            {{ __('messages.reset') }}
-                        </a>
-                    @endif
+                    <a href="{{ route('admin.residents.index') }}" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition min-h-touch inline-flex items-center">
+                        Set Semula
+                    </a>
                 </div>
             </form>
         </div>
@@ -39,9 +37,9 @@
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.name') }}</th>
-                                <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.ic_number') }}</th>
-                                <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.phone') }}</th>
+                                <x-sort-header column="name" label="{{ __('messages.name') }}" />
+                                <x-sort-header column="ic_number" label="{{ __('messages.ic_number') }}" />
+                                <x-sort-header column="phone" label="{{ __('messages.phone') }}" />
                                 <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.houses') }}</th>
                                 <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.status') }}</th>
                                 <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.actions') }}</th>

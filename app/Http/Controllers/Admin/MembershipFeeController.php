@@ -17,8 +17,15 @@ class MembershipFeeController extends Controller
      */
     public function index(Request $request)
     {
-        $query = MembershipFee::with(['house', 'resident'])
-            ->orderBy('created_at', 'desc');
+        $query = MembershipFee::with(['house', 'resident']);
+
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortDir = $request->get('sort_dir', 'desc');
+        $allowedSorts = ['fee_year', 'amount', 'status', 'paid_at', 'created_at'];
+        if (!in_array($sortBy, $allowedSorts)) { $sortBy = 'created_at'; }
+        if (!in_array($sortDir, ['asc', 'desc'])) { $sortDir = 'desc'; }
+
+        $query->orderBy($sortBy, $sortDir);
 
         // Filter by status
         if ($request->filled('status')) {

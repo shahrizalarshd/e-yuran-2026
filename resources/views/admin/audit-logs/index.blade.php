@@ -41,11 +41,11 @@
                     <input type="date" name="to_date" value="{{ request('to_date') }}" class="w-full rounded-lg border-gray-300 text-sm focus:ring-primary-500 focus:border-primary-500">
                 </div>
                 <div class="flex items-end gap-2">
-                    <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition min-h-touch">
+                    <button type="submit" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition min-h-touch">
                         {{ __('messages.filter') }}
                     </button>
-                    <a href="{{ route('admin.audit-logs.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition min-h-touch">
-                        {{ __('messages.reset') }}
+                    <a href="{{ route('admin.audit-logs.index') }}" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition min-h-touch inline-flex items-center">
+                        Set Semula
                     </a>
                 </div>
             </form>
@@ -66,10 +66,10 @@
                     <table class="w-full text-sm">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.date_time') }}</th>
+                                <x-sort-header column="created_at" label="{{ __('messages.date_time') }}" />
                                 <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.user') }}</th>
-                                <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.action') }}</th>
-                                <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.model') }}</th>
+                                <x-sort-header column="action" label="{{ __('messages.action') }}" />
+                                <x-sort-header column="model_type" label="{{ __('messages.model') }}" />
                                 <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.description') }}</th>
                                 <th class="px-4 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">IP</th>
                             </tr>

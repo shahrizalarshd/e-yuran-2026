@@ -44,11 +44,18 @@
                     @endfor
                 </select>
 
+                <select name="street" class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
+                    <option value="">{{ __('Semua Jalan') }}</option>
+                    @foreach($streets as $street)
+                        <option value="{{ $street }}" {{ request('street') === $street ? 'selected' : '' }}>{{ $street }}</option>
+                    @endforeach
+                </select>
+
                 <button type="submit" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition min-h-touch">
                     {{ __('messages.filter') }}
                 </button>
                 <a href="{{ route('admin.payments.index') }}" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition min-h-touch inline-flex items-center">
-                    Reset
+                    Set Semula
                 </a>
             </div>
         </form>
@@ -59,11 +66,11 @@
                 <table class="w-full">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.payment_no') }}</th>
+                            <x-sort-header column="payment_no" label="{{ __('messages.payment_no') }}" />
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.house') }}</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ __('messages.amount') }}</th>
-                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ __('messages.status') }}</th>
-                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ __('messages.date') }}</th>
+                            <x-sort-header column="amount" label="{{ __('messages.amount') }}" align="right" />
+                            <x-sort-header column="status" label="{{ __('messages.status') }}" align="center" />
+                            <x-sort-header column="created_at" label="{{ __('messages.date') }}" align="right" />
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ __('messages.actions') }}</th>
                         </tr>
                     </thead>

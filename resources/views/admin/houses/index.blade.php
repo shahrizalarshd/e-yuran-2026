@@ -22,21 +22,31 @@
             <div class="flex flex-wrap gap-3">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('messages.search') }}..." class="flex-1 min-w-[200px] rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
                 
-                <select name="status" onchange="this.form.submit()" class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
+                <select name="status" class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
                     <option value="">{{ __('messages.all') }} {{ __('messages.status') }}</option>
                     <option value="occupied" {{ request('status') === 'occupied' ? 'selected' : '' }}>{{ __('messages.occupied') }}</option>
                     <option value="vacant" {{ request('status') === 'vacant' ? 'selected' : '' }}>{{ __('messages.vacant') }}</option>
                 </select>
                 
-                <select name="is_registered" onchange="this.form.submit()" class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
+                <select name="is_registered" class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
                     <option value="">{{ __('Semua Pendaftaran') }}</option>
                     <option value="true" {{ request('is_registered') === 'true' ? 'selected' : '' }}>{{ __('messages.is_registered') }}</option>
                     <option value="false" {{ request('is_registered') === 'false' ? 'selected' : '' }}>{{ __('Tidak Berdaftar') }}</option>
                 </select>
 
+                <select name="street" class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
+                    <option value="">{{ __('Semua Jalan') }}</option>
+                    @foreach($streets as $street)
+                        <option value="{{ $street }}" {{ request('street') === $street ? 'selected' : '' }}>{{ $street }}</option>
+                    @endforeach
+                </select>
+
                 <button type="submit" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition min-h-touch">
                     {{ __('messages.filter') }}
                 </button>
+                <a href="{{ route('admin.houses.index') }}" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition min-h-touch inline-flex items-center">
+                    Set Semula
+                </a>
             </div>
         </form>
 
@@ -75,10 +85,10 @@
                 <table class="w-full">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.house_no') }}</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.street_name') }}</th>
-                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ __('messages.is_registered') }}</th>
-                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ __('messages.status') }}</th>
+                            <x-sort-header column="house_no" label="{{ __('messages.house_no') }}" />
+                            <x-sort-header column="street_name" label="{{ __('messages.street_name') }}" />
+                            <x-sort-header column="is_registered" label="{{ __('messages.is_registered') }}" align="center" />
+                            <x-sort-header column="status" label="{{ __('messages.status') }}" align="center" />
                             <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ __('messages.bills') }}</th>
                             <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ __('messages.actions') }}</th>
                         </tr>

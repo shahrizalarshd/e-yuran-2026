@@ -86,11 +86,11 @@
                         </select>
                     </div>
                     <div class="flex items-end gap-2">
-                        <button type="submit" class="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                        <button type="submit" class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition min-h-touch">
                             {{ __('messages.filter') }}
                         </button>
-                        <a href="{{ route('admin.membership-fees.index') }}" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-                            {{ __('messages.reset') }}
+                        <a href="{{ route('admin.membership-fees.index') }}" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition min-h-touch inline-flex items-center">
+                            Set Semula
                         </a>
                     </div>
                 </form>
@@ -104,10 +104,10 @@
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.house') }}</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.owner') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.year') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.amount') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.status') }}</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.paid_at') }}</th>
+                                <x-sort-header column="fee_year" label="{{ __('messages.year') }}" />
+                                <x-sort-header column="amount" label="{{ __('messages.amount') }}" />
+                                <x-sort-header column="status" label="{{ __('messages.status') }}" />
+                                <x-sort-header column="paid_at" label="{{ __('messages.paid_at') }}" />
                                 <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('messages.actions') }}</th>
                             </tr>
                         </thead>

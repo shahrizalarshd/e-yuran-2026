@@ -34,12 +34,24 @@ class HouseController extends Controller
             $query->where('is_registered', $request->is_registered === 'true');
         }
 
+        // Filter by street
+        if ($request->filled('street')) {
+            $query->where('street_name', $request->street);
+        }
+
+        $sortBy = $request->get('sort_by', 'street_name');
+        $sortDir = $request->get('sort_dir', 'asc');
+        $allowedSorts = ['house_no', 'street_name', 'is_registered', 'status'];
+        if (!in_array($sortBy, $allowedSorts)) { $sortBy = 'street_name'; }
+        if (!in_array($sortDir, ['asc', 'desc'])) { $sortDir = 'asc'; }
+
         $houses = $query->withCount(['bills', 'members'])
-            ->orderBy('street_name')
-            ->orderBy('house_no')
+            ->orderBy($sortBy, $sortDir)
             ->paginate(20);
 
-        return view('admin.houses.index', compact('houses'));
+        $streets = House::distinct()->pluck('street_name')->sort()->values();
+
+        return view('admin.houses.index', compact('houses', 'streets'));
     }
 
     public function create()

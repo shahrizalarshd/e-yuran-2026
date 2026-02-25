@@ -48,9 +48,20 @@ class BillController extends Controller
             });
         }
 
-        $bills = $query->orderBy('bill_year', 'desc')
-            ->orderBy('bill_month', 'desc')
-            ->orderBy('created_at', 'desc')
+        // Filter by street
+        if ($request->filled('street')) {
+            $query->whereHas('house', function ($q) use ($request) {
+                $q->where('street_name', $request->street);
+            });
+        }
+
+        $sortBy = $request->get('sort_by', 'bill_year');
+        $sortDir = $request->get('sort_dir', 'desc');
+        $allowedSorts = ['bill_no', 'bill_year', 'bill_month', 'amount', 'status'];
+        if (!in_array($sortBy, $allowedSorts)) { $sortBy = 'bill_year'; }
+        if (!in_array($sortDir, ['asc', 'desc'])) { $sortDir = 'desc'; }
+
+        $bills = $query->orderBy($sortBy, $sortDir)
             ->paginate(20);
 
         // Get available years for filter
@@ -58,7 +69,9 @@ class BillController extends Controller
             ->orderBy('bill_year', 'desc')
             ->pluck('bill_year');
 
-        return view('admin.bills.index', compact('bills', 'years'));
+        $streets = \App\Models\House::distinct()->pluck('street_name')->sort()->values();
+
+        return view('admin.bills.index', compact('bills', 'years', 'streets'));
     }
 
     public function show(Bill $bill)

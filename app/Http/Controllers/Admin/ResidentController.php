@@ -30,7 +30,13 @@ class ResidentController extends Controller
             });
         }
 
-        $residents = $query->orderBy('name')->paginate(20);
+        $sortBy = $request->get('sort_by', 'name');
+        $sortDir = $request->get('sort_dir', 'asc');
+        $allowedSorts = ['name', 'ic_number', 'phone'];
+        if (!in_array($sortBy, $allowedSorts)) { $sortBy = 'name'; }
+        if (!in_array($sortDir, ['asc', 'desc'])) { $sortDir = 'asc'; }
+
+        $residents = $query->orderBy($sortBy, $sortDir)->paginate(20);
 
         return view('admin.residents.index', compact('residents'));
     }

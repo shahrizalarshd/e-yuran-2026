@@ -36,7 +36,13 @@ class AuditLogController extends Controller
             $query->whereDate('created_at', '<=', $request->to_date);
         }
 
-        $logs = $query->orderBy('created_at', 'desc')->paginate(50);
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortDir = $request->get('sort_dir', 'desc');
+        $allowedSorts = ['created_at', 'action', 'model_type'];
+        if (!in_array($sortBy, $allowedSorts)) { $sortBy = 'created_at'; }
+        if (!in_array($sortDir, ['asc', 'desc'])) { $sortDir = 'desc'; }
+
+        $logs = $query->orderBy($sortBy, $sortDir)->paginate(50);
 
         // Get filter options
         $users = User::orderBy('name')->get(['id', 'name']);
