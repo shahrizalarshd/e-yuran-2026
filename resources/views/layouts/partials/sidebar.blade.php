@@ -92,6 +92,13 @@
                 <span>{{ __('messages.audit_logs') }}</span>
             </a>
             @endif
+
+            <a href="{{ route('admin.help') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg {{ request()->routeIs('admin.help') ? 'bg-primary-800 text-white' : 'text-primary-100 hover:bg-primary-600' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+                <span>{{ __('Panduan') }}</span>
+            </a>
         @else
             <!-- Resident Navigation -->
             <a href="{{ route('resident.dashboard') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg {{ request()->routeIs('resident.dashboard') ? 'bg-primary-800 text-white' : 'text-primary-100 hover:bg-primary-600' }}">
@@ -121,6 +128,13 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
                 <span>{{ __('messages.house_settings') }}</span>
+            </a>
+
+            <a href="{{ route('resident.help') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg {{ request()->routeIs('resident.help') ? 'bg-primary-800 text-white' : 'text-primary-100 hover:bg-primary-600' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+                <span>{{ __('Panduan') }}</span>
             </a>
         @endif
     </nav>

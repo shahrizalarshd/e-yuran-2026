@@ -17,6 +17,7 @@ use App\Http\Controllers\Resident\DashboardController as ResidentDashboardContro
 use App\Http\Controllers\Resident\BillController as ResidentBillController;
 use App\Http\Controllers\Resident\PaymentController as ResidentPaymentController;
 use App\Http\Controllers\Resident\HouseSettingsController;
+use App\Http\Controllers\HelpController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 
@@ -183,6 +184,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
             Route::get('/audit-logs/{auditLog}', [AuditLogController::class, 'show'])->name('audit-logs.show');
         });
+
+        // Help / Guide
+        Route::get('/help', [HelpController::class, 'admin'])->name('help');
     });
 
     // ==========================================
@@ -215,6 +219,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // House Settings (Owner only - for setting payer)
         Route::get('/house-settings', [HouseSettingsController::class, 'index'])->name('house-settings.index');
         Route::post('/house-settings/{house}/payer', [HouseSettingsController::class, 'updatePayer'])->name('house-settings.update-payer');
+
+        // Help / Guide
+        Route::get('/help', [HelpController::class, 'resident'])->name('help');
     });
 });
 
