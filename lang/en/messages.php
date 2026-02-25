@@ -127,6 +127,7 @@ return [
     'payment_type' => 'Payment Type',
     'current_month' => 'Current Month',
     'selected_months' => 'Selected Months',
+    'choose_months' => 'Choose Months',
     'yearly' => 'Yearly',
     'pay_now' => 'Pay Now',
     'pay_bill' => 'Pay Bill',

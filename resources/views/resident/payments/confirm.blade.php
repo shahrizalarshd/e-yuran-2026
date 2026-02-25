@@ -2,6 +2,28 @@
     <x-slot name="title">{{ __('messages.payment_confirmation') }}</x-slot>
 
     <div class="max-w-lg mx-auto">
+        <!-- Step Indicator -->
+        <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-sm font-bold">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <span class="text-sm text-primary-600">{{ __('Pilih Bil') }}</span>
+                </div>
+                <div class="flex-1 h-0.5 bg-primary-200 mx-3"></div>
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-primary-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
+                    <span class="text-sm font-semibold text-primary-700">{{ __('Semak') }}</span>
+                </div>
+                <div class="flex-1 h-0.5 bg-gray-200 mx-3"></div>
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-gray-200 text-gray-400 rounded-full flex items-center justify-center text-sm font-bold">3</div>
+                    <span class="text-sm text-gray-400">{{ __('Bayar') }}</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Confirmation Card -->
         <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
             <!-- Header -->

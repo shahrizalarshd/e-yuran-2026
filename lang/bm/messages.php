@@ -127,6 +127,7 @@ return [
     'payment_type' => 'Jenis Pembayaran',
     'current_month' => 'Bulan Semasa',
     'selected_months' => 'Bulan Terpilih',
+    'choose_months' => 'Pilih Bulan',
     'yearly' => 'Setahun',
     'pay_now' => 'Bayar Sekarang',
     'pay_bill' => 'Bayar Bil',

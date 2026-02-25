@@ -68,8 +68,8 @@ class PaymentController extends Controller
         // Get unpaid bills
         $unpaidBills = Bill::where('house_id', $house->id)
             ->whereIn('status', ['unpaid', 'partial'])
-            ->orderBy('bill_year')
-            ->orderBy('bill_month')
+            ->orderByDesc('bill_year')
+            ->orderByDesc('bill_month')
             ->get();
 
         if ($unpaidBills->isEmpty()) {
@@ -231,8 +231,8 @@ class PaymentController extends Controller
         $bills = Bill::whereIn('id', $validated['bill_ids'])
             ->where('house_id', $house->id)
             ->whereIn('status', ['unpaid', 'partial'])
-            ->orderBy('bill_year')
-            ->orderBy('bill_month')
+            ->orderByDesc('bill_year')
+            ->orderByDesc('bill_month')
             ->get();
 
         if ($bills->isEmpty()) {
