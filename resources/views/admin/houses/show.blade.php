@@ -212,32 +212,58 @@
                 <h3 class="font-semibold text-gray-900">{{ __('messages.bills') }}</h3>
             </div>
             @if($house->bills->count() > 0)
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.bill_period') }}</th>
-                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ __('messages.amount') }}</th>
-                                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ __('messages.status') }}</th>
-                                <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ __('messages.due_date') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            @foreach($house->bills->take(12) as $bill)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-3 font-medium text-gray-900">{{ $bill->bill_period }}</td>
-                                    <td class="px-4 py-3 text-right text-gray-600">RM {{ number_format($bill->amount, 2) }}</td>
-                                    <td class="px-4 py-3 text-center">
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $bill->status_badge_class }}">
-                                            {{ __('messages.' . $bill->status) }}
-                                        </span>
-                                    </td>
-                                    <td class="px-4 py-3 text-right text-gray-500">{{ $bill->due_date->format('d/m/Y') }}</td>
+                @php
+                    $billsByYear = $house->bills->groupBy('bill_year')->sortKeysDesc();
+                @endphp
+                @foreach($billsByYear as $year => $yearBills)
+                <div x-data="{ open: $loop->first }" class="border-b border-gray-100 last:border-b-0">
+                    <button @click="open = !open" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition">
+                        <div class="flex items-center gap-3">
+                            <span class="font-semibold text-gray-900">{{ $year }}</span>
+                            <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">{{ $yearBills->count() }} {{ __('messages.bills') }}</span>
+                            @php
+                                $unpaidCount = $yearBills->where('status', 'unpaid')->count();
+                                $paidCount = $yearBills->where('status', 'paid')->count();
+                            @endphp
+                            @if($unpaidCount > 0)
+                                <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">{{ $unpaidCount }} {{ __('messages.unpaid') }}</span>
+                            @endif
+                            @if($paidCount > 0)
+                                <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">{{ $paidCount }} {{ __('messages.paid') }}</span>
+                            @endif
+                        </div>
+                        <svg class="w-5 h-5 text-gray-400 transition-transform" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <div x-show="open" x-collapse>
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ __('messages.bill_period') }}</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ __('messages.amount') }}</th>
+                                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">{{ __('messages.status') }}</th>
+                                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ __('messages.due_date') }}</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @foreach($yearBills as $bill)
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-3 font-medium text-gray-900">{{ $bill->bill_period }}</td>
+                                        <td class="px-4 py-3 text-right text-gray-600">RM {{ number_format($bill->amount, 2) }}</td>
+                                        <td class="px-4 py-3 text-center">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium {{ $bill->status_badge_class }}">
+                                                {{ __('messages.' . $bill->status) }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-right text-gray-500">{{ $bill->due_date->format('d/m/Y') }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
+                @endforeach
             @else
                 <div class="p-8 text-center text-gray-500">
                     {{ __('Tiada bil') }}

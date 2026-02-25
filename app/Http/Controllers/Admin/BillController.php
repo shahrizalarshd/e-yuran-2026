@@ -146,8 +146,7 @@ class BillController extends Controller
 
     public function outstanding(Request $request)
     {
-        $houses = House::billable()
-            ->whereHas('bills', function ($query) {
+        $houses = House::whereHas('bills', function ($query) {
                 $query->whereIn('status', ['unpaid', 'partial']);
             })
             ->with(['bills' => function ($query) {
