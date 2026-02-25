@@ -148,6 +148,16 @@ class DashboardController extends Controller
             ->whereYear('paid_at', $currentYear)
             ->sum('amount');
 
+        // Cumulative collection: per-year breakdown and all-time total
+        $yearlyBreakdown = Bill::where('status', 'paid')
+            ->selectRaw('bill_year, SUM(paid_amount) as total')
+            ->groupBy('bill_year')
+            ->orderBy('bill_year')
+            ->pluck('total', 'bill_year')
+            ->toArray();
+
+        $allTimeCollection = array_sum($yearlyBreakdown);
+
         return view('admin.dashboard', compact(
             'stats',
             'recentPayments',
@@ -164,7 +174,9 @@ class DashboardController extends Controller
             'availableYears',
             'selectedYear',
             'compareYear',
-            'yearlyTotal'
+            'yearlyTotal',
+            'yearlyBreakdown',
+            'allTimeCollection'
         ));
     }
 }

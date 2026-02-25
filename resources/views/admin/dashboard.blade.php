@@ -104,12 +104,18 @@
         @if(auth()->user()->isSuperAdmin() || auth()->user()->isTreasurer())
         <!-- Analytics Header with Filter -->
         <div class="bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl p-4 lg:p-6 shadow-sm">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                 <div class="text-white">
                     <h2 class="text-lg font-semibold">{{ __('Analitik Kewangan') }}</h2>
-                    <p class="text-primary-100 text-sm">{{ __('Jumlah Kutipan') }} {{ $currentYear }}: <span class="font-bold text-white">RM {{ number_format($yearlyTotal, 2) }}</span></p>
+                    <p class="text-primary-100 text-sm mt-1">{{ __('Jumlah Kutipan') }} {{ $currentYear }}: <span class="font-bold text-white">RM {{ number_format($yearlyTotal, 2) }}</span></p>
+
+                    {{-- All-time cumulative collection --}}
+                    <div class="mt-3 pt-3 border-t border-white/20">
+                        <p class="text-primary-100 text-xs uppercase tracking-wider font-medium">{{ __('Kutipan Keseluruhan (Semua Tahun)') }}</p>
+                        <p class="text-2xl lg:text-3xl font-bold text-white mt-1">RM {{ number_format($allTimeCollection, 2) }}</p>
+                    </div>
                 </div>
-                <form action="{{ route('admin.dashboard') }}" method="GET" class="flex flex-wrap items-center gap-2 sm:gap-3">
+                <form action="{{ route('admin.dashboard') }}" method="GET" class="flex flex-wrap items-center gap-2 sm:gap-3 shrink-0">
                     <div class="flex items-center gap-2">
                         <label class="text-white text-xs sm:text-sm font-medium whitespace-nowrap">{{ __('Tahun') }}:</label>
                         <select name="year" onchange="this.form.submit()" class="rounded-lg border-0 bg-white/20 text-white text-sm font-medium focus:ring-2 focus:ring-white/50 min-w-[80px] backdrop-blur">
@@ -131,6 +137,21 @@
                 </form>
             </div>
         </div>
+
+        {{-- Yearly Collection Bar Chart --}}
+        @if(count($yearlyBreakdown) > 0)
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="p-3 sm:p-4 border-b border-gray-100">
+                <h2 class="font-semibold text-gray-900 text-sm sm:text-base">{{ __('Kutipan Mengikut Tahun') }}</h2>
+                <p class="text-xs sm:text-sm text-gray-500">{{ __('Jumlah kutipan dari tahun-tahun sebelum hingga semasa') }}</p>
+            </div>
+            <div class="p-3 sm:p-4">
+                <div class="relative h-[200px] sm:h-[250px]">
+                    <canvas id="yearlyCollectionChart"></canvas>
+                </div>
+            </div>
+        </div>
+        @endif
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
             <!-- Monthly Collection Chart -->
@@ -539,6 +560,67 @@
                                     callback: function(value) {
                                         if (isMobile && value >= 1000) {
                                             return 'RM ' + (value / 1000).toFixed(0) + 'k';
+                                        }
+                                        return 'RM ' + value.toLocaleString();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Yearly Collection Bar Chart
+            const yearlyCtx = document.getElementById('yearlyCollectionChart');
+            if (yearlyCtx) {
+                const yearlyData = @json($yearlyBreakdown);
+                const yearLabels = Object.keys(yearlyData);
+                const yearValues = Object.values(yearlyData).map(v => parseFloat(v));
+
+                new Chart(yearlyCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: yearLabels,
+                        datasets: [{
+                            label: '{{ __("Kutipan") }}',
+                            data: yearValues,
+                            backgroundColor: yearLabels.map((y) => y == {{ $currentYear }} ? 'rgba(22, 163, 74, 1)' : 'rgba(22, 163, 74, 0.6)'),
+                            borderRadius: isMobile ? 4 : 6,
+                            barThickness: isMobile ? 'flex' : undefined,
+                            maxBarThickness: isMobile ? 30 : 60
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                padding: isMobile ? 8 : 12,
+                                titleFont: { size: isMobile ? 11 : 14 },
+                                bodyFont: { size: isMobile ? 10 : 13 },
+                                callbacks: {
+                                    label: function(context) {
+                                        return 'RM ' + context.parsed.y.toLocaleString('en-MY', {minimumFractionDigits: 2});
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { font: { size: isMobile ? 10 : 12 } }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(0,0,0,0.05)' },
+                                ticks: {
+                                    font: { size: isMobile ? 9 : 11 },
+                                    maxTicksLimit: isMobile ? 5 : 8,
+                                    callback: function(value) {
+                                        if (value >= 1000) {
+                                            return 'RM ' + (value / 1000).toFixed(value >= 10000 ? 0 : 1) + 'k';
                                         }
                                         return 'RM ' + value.toLocaleString();
                                     }
