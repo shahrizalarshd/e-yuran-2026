@@ -23,19 +23,33 @@
             <div class="flex flex-wrap gap-3">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('Cari no. pembayaran, rumah...') }}" class="flex-1 min-w-[200px] rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
                 
-                <select name="status" onchange="this.form.submit()" class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
+                <select name="status" class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
                     <option value="">{{ __('messages.all') }} {{ __('messages.status') }}</option>
                     <option value="success" {{ request('status') === 'success' ? 'selected' : '' }}>{{ __('Berjaya') }}</option>
                     <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>{{ __('Tertangguh') }}</option>
                     <option value="failed" {{ request('status') === 'failed' ? 'selected' : '' }}>{{ __('Gagal') }}</option>
                 </select>
 
-                <input type="date" name="from_date" value="{{ request('from_date') }}" class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
-                <input type="date" name="to_date" value="{{ request('to_date') }}" class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
+                <select name="month" class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
+                    <option value="">-- {{ __('Bulan') }} --</option>
+                    @foreach(['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','September','Oktober','November','Disember'] as $i => $name)
+                        <option value="{{ $i + 1 }}" {{ request('month') == ($i + 1) ? 'selected' : '' }}>{{ $name }}</option>
+                    @endforeach
+                </select>
+
+                <select name="year" class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500">
+                    <option value="">-- {{ __('Tahun') }} --</option>
+                    @for($y = now()->year; $y >= 2017; $y--)
+                        <option value="{{ $y }}" {{ request('year') == $y ? 'selected' : '' }}>{{ $y }}</option>
+                    @endfor
+                </select>
 
                 <button type="submit" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition min-h-touch">
                     {{ __('messages.filter') }}
                 </button>
+                <a href="{{ route('admin.payments.index') }}" class="px-4 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition min-h-touch inline-flex items-center">
+                    Reset
+                </a>
             </div>
         </form>
 

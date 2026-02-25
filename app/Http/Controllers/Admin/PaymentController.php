@@ -18,12 +18,12 @@ class PaymentController extends Controller
             $query->where('status', $request->status);
         }
 
-        // Filter by date range
-        if ($request->filled('from_date')) {
-            $query->whereDate('created_at', '>=', $request->from_date);
+        // Filter by month and year
+        if ($request->filled('month')) {
+            $query->whereMonth('created_at', $request->month);
         }
-        if ($request->filled('to_date')) {
-            $query->whereDate('created_at', '<=', $request->to_date);
+        if ($request->filled('year')) {
+            $query->whereYear('created_at', $request->year);
         }
 
         // Search
