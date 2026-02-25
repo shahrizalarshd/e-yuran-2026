@@ -207,16 +207,49 @@
         </div>
 
         <!-- Bills -->
-        <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div class="p-4 border-b border-gray-100 flex items-center justify-between">
-                <h3 class="font-semibold text-gray-900">{{ __('messages.bills') }}</h3>
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden" x-data="{
+            filterYear: 'all',
+            filterStatus: 'all',
+            get filteredBills() { return true; }
+        }">
+            <div class="p-4 border-b border-gray-100">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="font-semibold text-gray-900">{{ __('messages.bills') }}</h3>
+                    <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">{{ $house->bills->count() }} bil</span>
+                </div>
+                @if($house->bills->count() > 0)
+                <div class="flex flex-wrap items-center gap-2">
+                    {{-- Year Filter --}}
+                    <select x-model="filterYear" class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500 py-1.5">
+                        <option value="all">{{ __('Semua Tahun') }}</option>
+                        @foreach($house->bills->pluck('bill_year')->unique()->sortDesc() as $year)
+                            <option value="{{ $year }}">{{ $year }}</option>
+                        @endforeach
+                    </select>
+
+                    {{-- Status Filter --}}
+                    <select x-model="filterStatus" class="rounded-lg border-gray-300 text-sm focus:border-primary-500 focus:ring-primary-500 py-1.5">
+                        <option value="all">{{ __('Semua Status') }}</option>
+                        <option value="unpaid">{{ __('messages.unpaid') }}</option>
+                        <option value="paid">{{ __('messages.paid') }}</option>
+                        <option value="processing">{{ __('messages.processing') }}</option>
+                    </select>
+
+                    {{-- Reset --}}
+                    <button x-show="filterYear !== 'all' || filterStatus !== 'all'"
+                            @click="filterYear = 'all'; filterStatus = 'all'"
+                            class="text-xs text-primary-600 hover:text-primary-800 font-medium px-2 py-1.5">
+                        {{ __('Set Semula') }}
+                    </button>
+                </div>
+                @endif
             </div>
             @if($house->bills->count() > 0)
                 @php
                     $billsByYear = $house->bills->groupBy('bill_year')->sortKeysDesc();
                 @endphp
                 @foreach($billsByYear as $year => $yearBills)
-                <div x-data="{ open: $loop->first }" class="border-b border-gray-100 last:border-b-0">
+                <div x-show="filterYear === 'all' || filterYear == '{{ $year }}'" x-data="{ open: $loop->first || filterYear != 'all' }" class="border-b border-gray-100 last:border-b-0">
                     <button @click="open = !open" class="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition">
                         <div class="flex items-center gap-3">
                             <span class="font-semibold text-gray-900">{{ $year }}</span>
@@ -248,7 +281,7 @@
                             </thead>
                             <tbody class="divide-y divide-gray-100">
                                 @foreach($yearBills as $bill)
-                                    <tr class="hover:bg-gray-50">
+                                    <tr class="hover:bg-gray-50" x-show="filterStatus === 'all' || filterStatus === '{{ $bill->status }}'">
                                         <td class="px-4 py-3 font-medium text-gray-900">{{ $bill->bill_period }}</td>
                                         <td class="px-4 py-3 text-right text-gray-600">RM {{ number_format($bill->amount, 2) }}</td>
                                         <td class="px-4 py-3 text-center">

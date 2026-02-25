@@ -34,8 +34,7 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
-        $overdueHouses = House::billable()
-            ->whereHas('bills', function ($query) {
+        $overdueHouses = House::whereHas('bills', function ($query) {
                 $query->where('status', 'unpaid')
                     ->where('due_date', '<', now());
             })

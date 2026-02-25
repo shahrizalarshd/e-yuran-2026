@@ -61,7 +61,7 @@ class BillingServiceTest extends TestCase
     // A. BILL GENERATION TESTS (MODEL HIBRID)
     // ==========================================
 
-    public function test_generate_monthly_bills_for_all_billable_houses(): void
+    public function test_generate_monthly_bills_for_all_houses(): void
     {
         $this->actingAs(User::factory()->superAdmin()->create());
 
@@ -72,15 +72,16 @@ class BillingServiceTest extends TestCase
             $this->createBillableHouse();
         }
         
-        // Create non-billable houses
+        // Create non-billable houses — these should also get bills now
         $this->createNonBillableHouse();
         House::factory()->create(); // No occupancy at all
 
         $result = $this->billingService->generateMonthlyBills(now()->year, now()->month);
 
         $this->assertTrue($result['success']);
-        $this->assertEquals(5, $result['generated']);
-        $this->assertEquals(5, Bill::count());
+        // All 7 houses should get bills (5 billable + 1 non-billable + 1 no occupancy)
+        $this->assertEquals(7, $result['generated']);
+        $this->assertEquals(7, Bill::count());
     }
 
     public function test_fails_when_no_fee_configuration(): void
@@ -130,14 +131,16 @@ class BillingServiceTest extends TestCase
         $this->assertEquals('unpaid', $bill->status);
     }
 
-    public function test_does_not_generate_bill_for_non_billable_house(): void
+    public function test_generates_bill_for_house_without_member(): void
     {
         $house = $this->createNonBillableHouse();
         $fee = FeeConfiguration::factory()->active()->create();
 
         $bill = $this->billingService->generateBillForHouse($house, now()->year, now()->month, $fee);
 
-        $this->assertNull($bill);
+        // Bil kini dijana untuk semua rumah tanpa perlu ada ahli
+        $this->assertNotNull($bill);
+        $this->assertEquals($house->id, $bill->house_id);
     }
 
     // ==========================================

@@ -14,19 +14,15 @@ class HouseObserver
 
     /**
      * Handle the House "updated" event.
-     * When a house becomes billable (is_registered=true AND is_active=true),
-     * automatically generate bills from current month to end of year.
+     * 
+     * NOTA: Auto-generation bil telah di-disable.
+     * Bil kini dijana secara manual oleh admin untuk SEMUA rumah sekaligus.
+     * Tidak perlu auto-generate bila rumah jadi billable.
      */
     public function updated(House $house): void
     {
-        // Check if house just became billable
-        $wasBillable = $house->getOriginal('is_registered') && $house->getOriginal('is_active');
-        $isBillable = $house->is_registered && $house->is_active;
-
-        // If house just became billable, generate bills
-        if (!$wasBillable && $isBillable) {
-            $this->generateBillsForNewlyBillableHouse($house);
-        }
+        // Auto-generation disabled — bil dijana upfront untuk semua rumah
+        // Logik lama disimpan di generateBillsForNewlyBillableHouse() untuk rujukan
     }
 
     /**

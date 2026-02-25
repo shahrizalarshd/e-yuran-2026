@@ -55,9 +55,7 @@ class SendBillReminders extends Command
             'errors' => 0,
         ];
 
-        // Get all houses with active members and unpaid bills
-        $houses = House::billable()
-            ->whereHas('bills', function ($query) {
+        $houses = House::whereHas('bills', function ($query) {
                 $query->whereIn('status', ['unpaid', 'partial']);
             })
             ->with(['bills' => function ($query) {

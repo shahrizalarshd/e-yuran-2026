@@ -85,7 +85,7 @@ class BillController extends Controller
     {
         $currentFee = \App\Models\FeeConfiguration::getCurrentFee();
         $currentFeeAmount = $currentFee ? $currentFee->amount : 20;
-        $housesCount = House::billable()->count();
+        $housesCount = House::count();
 
         return view('admin.bills.generate', compact('currentFeeAmount', 'housesCount'));
     }
@@ -186,8 +186,7 @@ class BillController extends Controller
      */
     public function reminders()
     {
-        $overdueHouses = House::billable()
-            ->whereHas('bills', function ($query) {
+        $overdueHouses = House::whereHas('bills', function ($query) {
                 $query->overdue();
             })
             ->withCount(['bills' => function ($query) {
@@ -195,8 +194,7 @@ class BillController extends Controller
             }])
             ->get();
 
-        $unpaidHouses = House::billable()
-            ->whereHas('bills', function ($query) {
+        $unpaidHouses = House::whereHas('bills', function ($query) {
                 $query->whereIn('status', ['unpaid', 'partial'])
                     ->where('due_date', '>=', now());
             })

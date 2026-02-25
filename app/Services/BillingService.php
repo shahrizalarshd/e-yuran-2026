@@ -44,8 +44,8 @@ class BillingService
             ];
         }
 
-        // MODEL HIBRID: Get houses with active members (occupancy is_member = true)
-        $houses = House::billable()->get();
+        // Bil dijana untuk SEMUA rumah dalam sistem
+        $houses = House::all();
         $totalGenerated = 0;
         $housesProcessed = 0;
         $errors = [];
@@ -116,10 +116,6 @@ class BillingService
      */
     private function generateBillForHouseWithAmount(House $house, int $year, int $month, float $amount, ?FeeConfiguration $feeConfig = null): ?Bill
     {
-        // Check if house has active member
-        if (!$house->is_member) {
-            return null;
-        }
 
         // Check if bill already exists
         $existingBill = Bill::where('house_id', $house->id)
@@ -170,14 +166,7 @@ class BillingService
             ];
         }
 
-        // Check if house has active member
-        if (!$house->is_member) {
-            return [
-                'success' => false,
-                'message' => 'House does not have an active member',
-                'generated' => 0,
-            ];
-        }
+        // Bil dijana untuk semua rumah tanpa perlu check membership
 
         $generated = 0;
 
@@ -287,22 +276,22 @@ class BillingService
             // 1. Register as member
             $occupancy->registerAsMember($membershipAmount);
 
-            // 2. Generate annual bills for remaining year
+            // 2. Bil sudah dijana awal — tidak perlu generate lagi
             $house = $occupancy->house;
-            $result = $this->generateBillsForNewHouse($house);
+            $existingBills = Bill::where('house_id', $house->id)->where('bill_year', now()->year)->count();
 
             DB::commit();
 
             AuditLog::logAction(
                 'member_registered',
                 "Occupancy {$occupancy->id} registered as member. Membership: RM " . number_format($membershipAmount, 2) . 
-                ". Annual bills generated: {$result['generated']}"
+                ". Existing bills for house: {$existingBills}"
             );
 
             return [
                 'success' => true,
                 'message' => 'Member registered successfully',
-                'bills_generated' => $result['generated'],
+                'bills_generated' => $existingBills,
             ];
 
         } catch (\Exception $e) {
@@ -465,8 +454,8 @@ class BillingService
             ];
         }
 
-        // MODEL HIBRID: Get houses with active members
-        $houses = House::billable()->get();
+        // Bil dijana untuk SEMUA rumah dalam sistem
+        $houses = House::all();
         $generated = 0;
         $skipped = 0;
         $errors = [];
@@ -506,10 +495,6 @@ class BillingService
      */
     public function generateBillForHouse(House $house, int $year, int $month, ?FeeConfiguration $feeConfig = null): ?Bill
     {
-        // Check if house has active member
-        if (!$house->is_member) {
-            return null;
-        }
 
         // Check if bill already exists
         $existingBill = Bill::where('house_id', $house->id)
@@ -587,7 +572,7 @@ class BillingService
     public function getStatistics(): array
     {
         $totalHouses = House::count();
-        $housesWithMembers = House::billable()->count();
+        $housesWithBills = House::whereHas('bills')->count();
 
         $totalCollection = Bill::where('status', 'paid')->sum('paid_amount');
         $totalOutstanding = Bill::whereIn('status', ['unpaid', 'partial'])
@@ -607,7 +592,7 @@ class BillingService
 
         return [
             'total_houses' => $totalHouses,
-            'houses_with_members' => $housesWithMembers,
+            'houses_with_members' => $housesWithBills,
             'total_members' => $totalMembers,
             'total_collection' => $totalCollection,
             'membership_collection' => $membershipCollection,

@@ -48,7 +48,7 @@
                     <p class="text-sm font-medium text-gray-700 mb-2">{{ __('Pratonton:') }}</p>
                     <div class="space-y-1 text-sm text-gray-600">
                         <p>📅 {{ __('Bulan') }}: <span class="font-medium">12 bulan</span></p>
-                        <p>🏠 {{ __('Rumah Berdaftar') }}: <span class="font-medium">{{ $housesCount ?? 25 }} rumah</span></p>
+                        <p>🏠 {{ __('Semua Rumah') }}: <span class="font-medium">{{ $housesCount ?? 25 }} rumah</span></p>
                         <p>💰 {{ __('Amaun Sebulan') }}: <span class="font-medium">RM <span x-text="parseFloat(document.getElementById('amount').value || {{ $currentFeeAmount ?? 20 }}).toFixed(2)">{{ number_format($currentFeeAmount ?? 20, 2) }}</span></span></p>
                     </div>
                     <div class="mt-3 pt-3 border-t border-gray-300">
@@ -76,7 +76,7 @@
                 <div class="text-sm text-yellow-800">
                     <p class="font-medium">{{ __('Perhatian') }}</p>
                     <ul class="mt-1 list-disc list-inside space-y-1">
-                        <li>{{ __('Bil hanya dijana untuk rumah yang berdaftar dan aktif') }}</li>
+                        <li>{{ __('Bil dijana untuk semua rumah dalam sistem') }}</li>
                         <li>{{ __('Bil sedia ada tidak akan ditimpa') }}</li>
                         <li>{{ __('Notifikasi akan dihantar kepada semua penduduk') }}</li>
                     </ul>
