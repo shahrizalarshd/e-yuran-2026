@@ -93,9 +93,15 @@
         </div>
 
         <!-- Actions -->
-        <a href="{{ route('admin.payments.index') }}" class="block w-full py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition text-center min-h-touch">
-            {{ __('messages.back') }}
-        </a>
+        <div class="flex gap-3">
+            <a href="{{ route('admin.payments.index') }}" class="flex-1 py-3 bg-gray-100 text-gray-700 font-medium rounded-xl hover:bg-gray-200 transition text-center min-h-touch">
+                {{ __('messages.back') }}
+            </a>
+            <a href="{{ route('admin.payments.print', $payment) }}" target="_blank" class="flex-1 py-3 bg-blue-500 text-white font-medium rounded-xl hover:bg-blue-600 transition text-center min-h-touch flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4H7v4a2 2 0 002 2zm0-16h6a2 2 0 012 2v2H7V5a2 2 0 012-2z"/></svg>
+                Cetak Resit
+            </a>
+        </div>
     </div>
 </x-app-layout>
 

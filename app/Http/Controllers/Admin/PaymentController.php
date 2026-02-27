@@ -143,5 +143,12 @@ class PaymentController extends Controller
             'years'
         ));
     }
+
+    public function printReceipt(Payment $payment)
+    {
+        $payment->load(['house', 'resident', 'bills']);
+
+        return view('admin.payments.print-receipt', compact('payment'));
+    }
 }
 

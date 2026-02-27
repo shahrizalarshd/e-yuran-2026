@@ -342,5 +342,12 @@ class BillController extends Controller
             return back()->with('error', 'Gagal menghantar email: ' . $e->getMessage());
         }
     }
+
+    public function printBill(Bill $bill)
+    {
+        $bill->load(['house', 'payments.resident']);
+
+        return view('admin.bills.print-bill', compact('bill'));
+    }
 }
 

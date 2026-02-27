@@ -132,6 +132,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('bills.send-reminder-house')
             ->middleware('role:super_admin,treasurer');
         Route::get('/bills/{bill}', [AdminBillController::class, 'show'])->name('bills.show');
+        Route::get('/bills/{bill}/print', [AdminBillController::class, 'printBill'])->name('bills.print');
         Route::get('/bills/{bill}/edit', [AdminBillController::class, 'edit'])
             ->name('bills.edit')
             ->middleware('role:super_admin,treasurer');
@@ -149,6 +150,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->middleware('role:super_admin,treasurer');
         Route::get('/payments/report', [AdminPaymentController::class, 'report'])->name('payments.report');
         Route::get('/payments/{payment}', [AdminPaymentController::class, 'show'])->name('payments.show');
+        Route::get('/payments/{payment}/print', [AdminPaymentController::class, 'printReceipt'])->name('payments.print');
 
         // Fee Configuration (Super Admin & Treasurer)
         Route::resource('fees', FeeConfigurationController::class)
